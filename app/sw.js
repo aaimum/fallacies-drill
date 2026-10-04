@@ -1,8 +1,8 @@
 // Offline cache for the Fallacy Drill app.
 // App files: network first, so edits to fallacy-drill.html show up; cached copy when offline.
 // Google Fonts: cached copy first, since they never change.
-const CACHE = "fdd-v1";
-const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon.svg", "../fallacy-drill.html"];
+const CACHE = "fdd-v2";
+const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon.svg", "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png", "../fallacy-drill.html"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
