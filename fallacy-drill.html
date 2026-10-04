@@ -130,6 +130,14 @@ ul.tight{margin:4px 0 0;padding-left:20px;display:flex;flex-direction:column;gap
 .gradegrid div{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px;text-align:center}
 .gradegrid div.hl{border-color:var(--accent);background:var(--accent-soft)}
 kbd{font-family:var(--f-mono);font-size:.78rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--bg)}
+.mixrow{border-left:3px solid var(--bad);padding:2px 0 2px 12px;display:flex;flex-direction:column;gap:3px}
+.lastlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.lastlist li{display:grid;grid-template-columns:2em 1fr;gap:2px 8px}
+.lastlist .n{font-family:var(--f-mono);color:var(--muted);font-size:.8rem;padding-top:3px;font-variant-numeric:tabular-nums}
+.lastlist .d{grid-column:2;font-size:.92rem;color:var(--muted)}
+.lastlist .d .chip{margin-top:4px;font-size:.78rem}
+.lab.f{color:var(--fal)} .lab.b{color:var(--bia)}
+.typ.lab{font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
 @media (max-width:520px){.why{grid-template-columns:1fr}.kind dl{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
@@ -143,6 +151,7 @@ kbd{font-family:var(--f-mono);font-size:.78rem;border:1px solid var(--line);bord
     <button role="tab" data-tab="start" aria-selected="true">Start here</button>
     <button role="tab" data-tab="learn" aria-selected="false">Learn</button>
     <button role="tab" data-tab="play" aria-selected="false">Play</button>
+    <button role="tab" data-tab="last" aria-selected="false">Last look</button>
     <button role="tab" data-tab="sheet" aria-selected="false">Cheat sheet</button>
     <button role="tab" data-tab="pairs" aria-selected="false">Look-alikes</button>
     <button role="tab" data-tab="notes" aria-selected="false">Source notes</button>
@@ -150,6 +159,7 @@ kbd{font-family:var(--f-mono);font-size:.78rem;border:1px solid var(--line);bord
   <section id="tab-start" class="stack"></section>
   <section id="tab-learn" class="stack" hidden></section>
   <section id="tab-play" class="stack" hidden></section>
+  <section id="tab-last" class="stack" hidden></section>
   <section id="tab-sheet" class="stack" hidden></section>
   <section id="tab-pairs" class="stack" hidden></section>
   <section id="tab-notes" class="stack" hidden></section>
@@ -447,29 +457,48 @@ const LS = {get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):
 let STARS = LS.get("fdd-stars",{});  // n -> 0..3
 let SEEN = LS.get("fdd-seen",{});    // n -> true
 let BEST = LS.get("fdd-best",{});    // game -> points
+let MIX = LS.get("fdd-mix",{});      // n -> {wrong pick n: times}
 const stars = n => STARS[n]||0;
 function mark(n, ok){ SEEN[n]=true; STARS[n] = ok ? Math.min(3, stars(n)+1) : 0; LS.set("fdd-stars",STARS); LS.set("fdd-seen",SEEN); }
+function noteMix(n, k){ if(k==null || k===n) return; MIX[n]=MIX[n]||{}; MIX[n][k]=(MIX[n][k]||0)+1; LS.set("fdd-mix",MIX); }
+// every item you've mixed this one up with, in either direction
+function partners(n){ const s=new Set(Object.keys(MIX[n]||{}).map(Number)); for(const k in MIX) if(MIX[k][n]) s.add(+k); s.delete(n); return [...s]; }
+const mixPairs = () => Object.entries(MIX).flatMap(([n,o])=>Object.entries(o).map(([k,c])=>({n:+n,k:+k,c})))
+  .sort((a,b)=>(stars(a.n)===3)-(stars(b.n)===3) || b.c-a.c || stars(a.n)-stars(b.n));
+const mixItems = () => [...new Set(mixPairs().filter(p=>stars(p.n)<3).map(p=>p.n))];
 
 const shuffle = a => {a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const pick = a => a[Math.floor(Math.random()*a.length)];
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const clean = t => t.replace(" (Handbook sample)","");
 
-// distractors: look-alikes first, then same family, then anything
+// distractors: one of your own past mix-ups, then look-alikes, then same family, then anything
+const sibs = n => { const s=new Set(); (ITEM_CL[n]||[]).forEach(id=>CLUSTERS.find(c=>c.id===id).m.forEach(([x])=>{if(x!==n)s.add(x)})); return [...s]; };
 function itemOptions(n, pool){
   if(pool){ return shuffle([n, ...shuffle(pool.filter(x=>x!==n)).slice(0,4)]); }
-  const sib = new Set(); (ITEM_CL[n]||[]).forEach(id=>CLUSTERS.find(c=>c.id===id).m.forEach(([x])=>{if(x!==n)sib.add(x)}));
-  let picks = shuffle([...sib]).slice(0,2);
+  const picks = shuffle(partners(n)).slice(0,1);
+  shuffle(sibs(n)).filter(x=>!picks.includes(x)).slice(0,2).forEach(x=>picks.push(x));
   shuffle(FAM_OF[n].m.filter(x=>x!==n && !picks.includes(x))).slice(0,1).forEach(x=>picks.push(x));
   const rest = shuffle(ITEMS.map(i=>i.n).filter(x=>x!==n && !picks.includes(x)));
   while(picks.length<4) picks.push(rest.pop());
   return shuffle([n,...picks]);
 }
+// a different scenario (or giveaway line) from the one just shown
+const another = (list, prev) => pick(list.map(clean).filter(t=>t!==prev)) ?? clean(pick(list));
 function itemQ(n, text, pool){
-  return {kind:"item", n, ans:n, text: text ?? clean(pick(BY[n].s)), opts:itemOptions(n,pool).map(k=>({k,label:BY[k].name}))};
+  const q = {kind:"item", n, ans:n, text: text ?? clean(pick(BY[n].s)), opts:itemOptions(n,pool).map(k=>({k,label:BY[k].name}))};
+  q.re = () => itemQ(n, another(BY[n].s, q.text), pool);
+  return q;
 }
-function snapQ(n, pool){ const q=itemQ(n, pick(BY[n].t), pool); q.snap=true; return q; }
-function triageQ(n){ return {kind:"fam", n, ans:FAM_OF[n].id, text:clean(pick(BY[n].s)), opts:FAM.map(f=>({k:f.id,label:f.name}))}; }
+function snapQ(n, pool){ const q=itemQ(n, pick(BY[n].t), pool); q.snap=true; q.re = () => { const r=itemQ(n, another(BY[n].t, q.text), pool); r.snap=true; return r; }; return q; }
+function triageQ(n, text){ const q={kind:"fam", n, ans:FAM_OF[n].id, text: text ?? clean(pick(BY[n].s)), opts:FAM.map(f=>({k:f.id,label:f.name}))}; q.re = () => triageQ(n, another(BY[n].s, q.text)); return q; }
+// mix-up drill: options are the items you actually confused this one with, then its look-alikes
+function mixQ(n, text){
+  const others = [...new Set([...shuffle(partners(n)), ...shuffle(sibs(n)), ...shuffle(FAM_OF[n].m)])].filter(x=>x!==n).slice(0,4);
+  const q = {kind:"item", n, ans:n, text: text ?? clean(pick(BY[n].s)), opts:shuffle([n,...others]).map(k=>({k,label:BY[k].name}))};
+  q.re = () => mixQ(n, another(BY[n].s, q.text));
+  return q;
+}
 
 // ---------- generic game engine ----------
 let G=null, tick=null, HOST=null;
@@ -492,7 +521,7 @@ function showQ(){
   const mult = 1+Math.min(3,Math.floor(G.streak/3));
   HOST.innerHTML = `
   <div class="case">
-    <div class="casehead"><span>${esc(G.title)} · ${G.i+1}/${G.qs.length}${G.feedback?` · ${G.score} right`:""}${G.points&&G.streak>=3?` · <span class="streak">streak ${G.streak} · x${mult}</span>`:""}</span><span class="clock">--</span></div>
+    <div class="casehead"><span>${esc(G.title)} · ${G.i+1}/${G.qs.length}${q.retest?` <span class="flag">re-test</span>`:""}${G.feedback?` · ${G.score} right`:""}${G.points&&G.streak>=3?` · <span class="streak">streak ${G.streak} · x${mult}</span>`:""}</span><span class="clock">--</span></div>
     <div class="bar"><i style="width:100%"></i></div>
     ${q.snap?`<p class="q" style="padding-top:16px;margin-bottom:-14px">Which one gives itself away like this?</p>`:""}
     <p class="scen${q.snap?" snap":""}">${esc(q.text)}</p>
@@ -514,7 +543,11 @@ function answer(k){
   if(ok){ G.score++; G.streak++; G.bestStreak=Math.max(G.bestStreak,G.streak);
     if(G.points){ const mult=1+Math.min(3,Math.floor((G.streak-1)/3)); gained=(100+Math.round(remaining()*10))*mult; G.pts+=gained; } }
   else G.streak=0;
-  if(q.kind==="item") mark(q.n, ok);
+  if(q.kind==="item"){ mark(q.n, ok); if(!ok) noteMix(q.n, key); }
+  // a miss comes back three questions later in a new wording (once per item per round; never in the mock)
+  let back = false;
+  if(!ok && G.feedback && q.re && !q.retest){ G.retested = G.retested || new Set();
+    if(!G.retested.has(q.n)){ G.retested.add(q.n); const r=q.re(); r.retest=true; G.qs.splice(Math.min(G.qs.length, G.i+4), 0, r); back = true; } }
   if(!G.feedback){ G.i++; if(G.i>=G.qs.length) finish(); else showQ(); return; }
   G.locked=true;
   HOST.querySelectorAll(".opt").forEach(b=>{b.disabled=true; const kk = q.kind==="item"? +b.dataset.k : b.dataset.k; if(kk===q.ans)b.classList.add("right"); else if(kk===key)b.classList.add("wrong")});
@@ -531,6 +564,7 @@ function answer(k){
   HOST.querySelector("#fb").innerHTML = `<div class="fb">
     <span class="verdict ${ok?"ok":"bad"}">${ok?"Correct":key===null?"Time's up":"Not this one"} · ${secs.toFixed(1)} s ${gained?`<span class="pop">+${gained}</span>`:""}</span>
     ${body}
+    ${back?`<p class="cue muted">This one comes back in a few questions with a different scenario.</p>`:""}
     <div><button class="btn" id="next">${G.i+1<G.qs.length?"Next":"See result"}</button></div></div>`;
   HOST.querySelector("#next").onclick=next; HOST.querySelector("#next").focus();
   if(auto){ G.autoT=setTimeout(()=>{ if(G && G.locked && !G.done) next(); }, 900); }
@@ -575,6 +609,12 @@ document.addEventListener("keydown",e=>{
 function drawStart(){
   document.getElementById("tab-start").innerHTML = `
   <div class="panel stack">
+    <div class="row" style="justify-content:space-between"><h2>On the move</h2><span class="meta">works offline</span></div>
+    <p class="muted small">Got three minutes? Quick 5 picks what you most need next. Right before the test, read Last look instead of playing.</p>
+    <div class="row"><button class="btn" id="go-quick">Quick 5</button><button class="btn ghost" id="go-last">Last look</button></div>
+  </div>
+
+  <div class="panel stack">
     <h2>Three kinds of mistake</h2>
     <p class="muted">All 60 items are one of these. Sorting a question into its kind is the first move, and it halves the options.</p>
     <div class="grid">
@@ -616,11 +656,14 @@ function drawStart(){
       <dt>Answer, don't reread</dt><dd>Practice testing is one of two techniques rated high utility in the main review of study methods (Dunlosky et al., 2013). Every Learn batch ends in a quiz, and every game makes you answer.</dd>
       <dt>Mix the look-alikes</dt><dd>Interleaving, mixing examples from similar categories, beats studying one category at a time when you must tell categories apart (Kornell and Bjork, 2008). A 2026 replication held up under forced-choice testing, the same format as this test. Snap, Sprint and the look-alike drills deliberately mix confusable items.</dd>
       <dt>Spread it out</dt><dd>Distributed practice is the other high-utility technique. Spread your rounds over several days, starting each morning cold.</dd>
+      <dt>Misses come back</dt><dd>A missed item returns three questions later in a different scenario, and every wrong pick is remembered and offered again as an option until you can tell the pair apart.</dd>
       <dt>Contrast on every miss</dt><dd>When you're wrong you see both definitions side by side, which trains the boundary, not just the name.</dd>
       <dt>Hooks and phrases</dt><dd>Memory hooks are handles for the first few days; the review rates mnemonics low for long-term learning, which doesn't matter for a test days away.</dd>
       <dt>Points and streaks</dt><dd>A meta-analysis found gamification gives a moderate gain on learning outcomes (g = 0.49, Sailer and Homner, 2020). Their job here is to get you to do more practice rounds; the rounds do the learning.</dd>
     </dl>
   </div>`;
+  document.getElementById("go-quick").onclick=()=>{ showTab("play"); startQuick(); };
+  document.getElementById("go-last").onclick=()=>{ showTab("last"); scrollTo(0,0); };
   refreshBoards();
 }
 function refreshBoards(){
@@ -683,8 +726,15 @@ function drawPlay(){
   if(G && !G.done && HOST===PH) stopGame();
   const weak = ITEMS.filter(i=>SEEN[i.n] && stars(i.n)<2).length;
   const famSel = `<option value="all">All 60</option><option value="f">Fallacies only</option><option value="b">Biases only</option>${FAM.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join("")}`;
+  const nMix = mixItems().length;
   PH.innerHTML = `
   <div class="grid">
+    <div class="panel stack"><span class="meta">5 Q · about 3 min · on the move</span><h3>Quick 5</h3>
+      <p class="muted small">Your recent misses and mix-ups first, then items you haven't met yet. A miss comes back once in a new wording.</p>
+      <div class="row"><button class="btn" id="quick">Play</button></div></div>
+    <div class="panel stack"><span class="meta">${nMix} item${nMix===1?"":"s"} you've confused</span><h3>My mix-ups</h3>
+      <p class="muted small">Only the pairs you have actually mixed up, with each other as the options. Do this until it runs dry.</p>
+      <div class="row"><button class="btn" id="mix" ${nMix?"":"disabled"}>Play</button></div></div>
     <div class="panel stack"><span class="meta" style="color:var(--bia)">20 rounds · 10 s each · streak multiplier</span><h3>Signal Snap</h3>
       <p class="muted small">Just the giveaway words, no full scenario. Name it fast. Every three in a row raises your multiplier; speed earns bonus points.</p>
       <select id="snapset" aria-label="Snap set">${famSel}</select>
@@ -714,6 +764,8 @@ function drawPlay(){
   </div>`;
   const back=()=>drawPlay();
   PH.querySelector("#snap").onclick=()=>{const set=PH.querySelector("#snapset").value; startSnap(set)};
+  PH.querySelector("#quick").onclick=startQuick;
+  PH.querySelector("#mix").onclick=startMix;
   PH.querySelector("#tri").onclick=startTriage;
   PH.querySelector("#sprint").onclick=startSprint;
   PH.querySelector("#weak").onclick=startWeak;
@@ -746,7 +798,84 @@ function startCluster(cid){
   const c=CLUSTERS.find(x=>x.id===cid), p=c.m.map(x=>x[0]); const list=[]; p.forEach(n=>BY[n].s.forEach(t=>list.push([n,t])));
   play({id:"cl", title:c.title, qs:shuffle(list).slice(0,12).map(([n,t])=>itemQ(n,clean(t),p)), perQ:40, feedback:true, again:()=>startCluster(cid), onExit:drawPlay}, PH);
 }
+function startQuick(){
+  const all = ITEMS.map(i=>i.n), take = new Set();
+  const add = (list, k) => { for(const n of shuffle(list)){ if(take.size>=5 || k<=0) break; if(!take.has(n)){ take.add(n); k--; } } };
+  add(all.filter(n=>SEEN[n] && stars(n)===0), 2);          // missed last time
+  add(mixItems(), 1);                                       // a mix-up
+  add(all.filter(n=>!SEEN[n]), 5);                          // not met yet
+  add([...all].sort((a,b)=>stars(a)-stars(b)).slice(0,20), 5); // then the least solid
+  play({id:"quick", title:"Quick 5", qs:shuffle([...take]).map(n=>itemQ(n)), perQ:40, feedback:true, again:startQuick, onExit:drawPlay}, PH);
+}
+function startMix(){
+  const m = mixItems(); if(!m.length){ drawPlay(); return; }
+  const order=[]; while(order.length<Math.min(12, m.length*2)) order.push(...shuffle(m));
+  play({id:"mix", title:"My mix-ups", qs:order.slice(0,Math.min(12, m.length*2)).map(n=>mixQ(n)), perQ:40, feedback:true, again:startMix, onExit:drawPlay}, PH);
+}
 function startMock(){ play({id:"mock", title:"Full mock", mock:true, qs:shuffle(ITEMS.map(i=>i.n)).slice(0,26).map(n=>itemQ(n)), total:1200, feedback:false, again:startMock, onExit:drawPlay}, PH); }
+
+// ---------- LAST LOOK (read just before the test) ----------
+function drawLast(){
+  const el=document.getElementById("tab-last");
+  const pairs = mixPairs().filter(p=>stars(p.n)<3).slice(0,8);
+  const inPairs = new Set(pairs.map(p=>p.n));
+  const missed = ITEMS.filter(i=>SEEN[i.n] && stars(i.n)===0 && !inPairs.has(i.n));
+  const seen = Object.keys(SEEN).length;
+  el.innerHTML = `
+  <div class="panel stack">
+    <span class="meta">about 10 minutes · read top to bottom · no questions</span>
+    <h2>Last look</h2>
+    <p class="muted small">For the minutes before the test. Your own weak spots first, then all 60 in one line each, then the questions that split the look-alikes.</p>
+  </div>
+
+  <div class="panel stack">
+    <h3>The 40-second triage</h3>
+    <div class="flow">
+      <div class="step"><span class="num">1</span><div><b>Someone arguing a point?</b> ('so', 'should', 'must', 'therefore') It's a fallacy. Is the trick in the wording, an attack, the chain of steps, or a cause or comparison?</div></div>
+      <div class="step"><span class="num">2</span><div><b>Someone judging or deciding?</b> It's a bias or heuristic. Odds and numbers, other people, themselves, or clinging to the past?</div></div>
+      <div class="step"><span class="num">3</span><div><b>Find the giveaway words.</b> One phrase usually names it.</div></div>
+      <div class="step"><span class="num">4</span><div><b>Two still fit?</b> Ask the deciding question below. Commit by about 40 s. Never leave a blank.</div></div>
+    </div>
+  </div>
+
+  <div class="panel stack">
+    <div class="row" style="justify-content:space-between"><h3>Your danger list</h3><span class="meta">${seen}/60 seen</span></div>
+    ${pairs.length || missed.length ? `
+      ${pairs.map(p=>`<div class="mixrow"><p><b>${esc(BY[p.n].name)}</b> <span class="muted">mistaken for</span> <b>${esc(BY[p.k].name)}</b> <span class="meta">· mixed up ${p.c}×</span></p>
+        <p class="small">${esc(BY[p.n].d)}</p><p class="small muted">${esc(BY[p.k].name)}: ${esc(BY[p.k].d)}</p></div>`).join("")}
+      ${missed.length?`<div><div class="lbl">Missed last time</div><div class="branch">${missed.map(i=>`<span class="chip ${FAM_OF[i.n].k}">${i.n} · ${esc(i.name)}</span>`).join("")}</div></div>`:""}
+      ${pairs.length?`<div><button class="btn" id="last-mix">Drill my mix-ups</button></div>`:""}`
+    : `<p class="muted small">Nothing yet. Play a few rounds and the pairs you confuse will appear here, with both meanings side by side.</p>`}
+  </div>
+
+  ${FAM.map(f=>`<div class="panel stack">
+    <div><span class="typ ${f.k} lab">${f.k==="f"?"Fallacies":"Biases / heuristics"}</span><h3>${esc(f.name)}</h3><p class="muted small">${esc(f.gist)}</p></div>
+    <ul class="lastlist">${f.m.map(n=>{const i=BY[n]; return `<li><span class="n">${n}</span><span><b>${esc(i.name)}</b>${i.alt?` <span class="muted small">(${esc(i.alt)})</span>`:""}</span>
+      <span class="d">${esc(i.d)} <span class="chip tell">${esc(i.t[0])}</span></span></li>`}).join("")}</ul>
+  </div>`).join("")}
+
+  <div class="panel stack">
+    <h3>Questions that split the look-alikes</h3>
+    <dl class="why">${CLUSTERS.map(c=>`<dt>${esc(c.title)}</dt><dd>${esc(c.ask)}</dd>`).join("")}</dl>
+  </div>
+
+  <div class="panel stack">
+    <h3>Tie-breakers from the sources</h3>
+    <ul class="tight">
+      <li>A Cottrell example, or one thing following another: <b>Incorrectly assuming a causal link (8)</b>. A named third factor driving both: <b>9</b>. No possible relationship: <b>False correlation (7)</b>.</li>
+      <li>A contradiction, or Cottrell's station murder passage: <b>Lack of consistency (4)</b>. One hidden assumption: <b>non sequitur (6)</b>.</li>
+      <li>'If A then B; B; so A' with both offered: <b>Affirming the consequent (26)</b>.</li>
+      <li>Only two options offered: <b>False dichotomy (28)</b>, even though Cottrell files it under misrepresentation.</li>
+      <li>Castle of cards or house of cards: both mean <b>Unwarranted leaps (16)</b>.</li>
+      <li>Headline cases taken to stand for a whole group, with Availability also offered: the module sheet points to <b>Spotlight effect (56)</b>.</li>
+    </ul>
+  </div>
+
+  <div class="panel stack"><h3>On the day</h3>
+    <ul class="tight"><li>No negative marking, no going back. Triage, eliminate, commit at about 40 s.</li><li>The test is built on the list of 60, so an option that isn't on the list is unlikely to be the answer.</li></ul>
+  </div>`;
+  const lm=el.querySelector("#last-mix"); if(lm) lm.onclick=()=>{ showTab("play"); startMix(); };
+}
 
 // ---------- CHEAT SHEET ----------
 function drawSheet(){
@@ -797,8 +926,9 @@ function drawNotes(){
 // ---------- tabs ----------
 function showTab(t){
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===t));
-  ["start","learn","play","sheet","pairs","notes"].forEach(x=>document.getElementById("tab-"+x).hidden = x!==t);
+  ["start","learn","play","last","sheet","pairs","notes"].forEach(x=>document.getElementById("tab-"+x).hidden = x!==t);
   if(t==="start") refreshBoards();
+  if(t==="last") drawLast();
   if(t==="learn" && !LEARN && (!G || G.done || HOST!==LH)) drawLearnHome();
   if(t==="play" && (!G || G.done || HOST!==PH)) drawPlay();
 }
