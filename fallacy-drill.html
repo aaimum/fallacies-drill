@@ -179,7 +179,7 @@ const ITEMS = [
 {n:7,name:"False correlation",src:"Cottrell p.93",cue:"Two trends move together but have no real relationship at all; pure coincidence.",s:[
 "Phones now come in far more colours than ten years ago, and phone theft has risen too. The wider the colour range, the higher the theft rate.",
 "Since the café started playing jazz, more cyclists have been passing on the street outside. More jazz, more cycling."]},
-{n:8,name:"Incorrectly assuming a causal link",alt:"post hoc ergo propter hoc",src:"Cottrell p.92",cue:"B came after A, so A must have caused B. The tell is the time order.",s:[
+{n:8,name:"Incorrectly assuming a causal link",alt:"post hoc ergo propter hoc",src:"Cottrell p.92",cue:"One thing is assumed to have caused another because it came first, or because the two turned up together. The list's Latin name points at time order.",s:[
 "I wore my new shoes to the interview and got the job. They are my lucky shoes now.",
 "We launched the new logo in March and sales rose in April. The rebrand worked.",
 "A prisoner who protested on the roof was released. That is the second roof protester released this year. Roof protests must be a good way to get out."]},
@@ -205,7 +205,7 @@ const ITEMS = [
 {n:15,name:"Exclusion",src:"Cottrell p.100",cue:"Opponents cast as an out-group: 'any decent person', 'people like them'.",s:[
 "Any sensible parent would support banning phones in schools. The only people objecting are tech lobbyists.",
 "Real Dubliners understand why the congestion charge is needed. It's only blow-ins from the commuter belt who complain."]},
-{n:16,name:"Unwarranted leaps",alt:"castle of cards; sleight of hand",src:"Cottrell p.102",cue:"Two plus two makes five: a chain of unproven steps, or a quiet switch in wording at the conclusion.",s:[
+{n:16,name:"Unwarranted leaps",alt:"castle of cards (the module list says house of cards); sleight of hand",src:"Cottrell p.102",cue:"Two plus two makes five: a chain of unproven steps, or a quiet switch in wording at the conclusion.",s:[
 "Commuters want less traffic. A toll would reduce traffic. So commuters will support a heavy toll.",
 "Speed cameras can't catch every driver, so speeding laws can't be enforced. Laws that can't be enforced shouldn't exist. So speeding isn't really an offence."]},
 {n:17,name:"Emotive language",alt:"loaded language",src:"Cottrell p.103",cue:"Charged words and emotive subjects do the persuading in place of reasons.",s:[
@@ -304,7 +304,7 @@ const ITEMS = [
 {n:48,name:"Curse of knowledge",alt:"curse of expertise",src:"Module sheet",cue:"An expert cannot imagine not knowing, so assumes others share the knowledge.",s:[
 "The data architect tells new joiners to 'just join the fact table on the surrogate key' and can't see why they look lost.",
 "The professor sets what she calls a simple warm-up question. Nobody in the class understands it."]},
-{n:49,name:"Appeal to consequences",src:"Module sheet",cue:"A claim judged true or false by whether its consequences would be welcome.",s:[
+{n:49,name:"Appeal to consequences",alt:"argument from consequences",src:"Module sheet",cue:"A claim judged true or false by whether its consequences would be welcome.",s:[
 "AI can't be about to replace junior analysts, because that would be terrible for graduates.",
 "There can't be a recession next year. It would ruin my investment plans."]},
 {n:50,name:"Appeal to ignorance",src:"Module sheet",cue:"Not proven false, so it's true (or not proven true, so it's false).",s:[
@@ -331,7 +331,7 @@ const ITEMS = [
 {n:57,name:"Bandwagon effect",alt:"ad populum",src:"Module sheet",cue:"Believing or doing something because many others do.",s:[
 "Everyone in our cohort is buying the new laptop, so it must be the best one.",
 "Ten million people take this supplement. It must work."]},
-{n:58,name:"Presentism",src:"Module sheet",flag:"Sheet note unclear",cue:"Judging past people or events by today's values or knowledge.",s:[
+{n:58,name:"Presentism",alt:"nunc pro tunc",src:"Module sheet",flag:"Sheet note unclear",cue:"Judging past people or events by today's values or knowledge.",s:[
 "Managers in the 1960s were fools for not using email.",
 "Medieval doctors were stupid for bleeding their patients."]},
 {n:59,name:"Base rate fallacy",src:"Module sheet",cue:"The general prevalence figure is given and then ignored for the specific case.",s:[
@@ -343,7 +343,7 @@ const ITEMS = [
 ];
 
 const CLUSTERS = [
-{id:"cause",title:"Cause and link",ask:"Is there a time order, a shared hidden cause, or no relationship at all?",m:[[8,"B came after A (time order)."],[9,"A and B occur together; a third factor drives both."],[7,"Trends move together by coincidence; no relationship."],[26,"If A then B; B; so A. A logic form, not a trend."]]},
+{id:"cause",title:"Cause and link",ask:"Is a named third factor driving both, is there no relationship at all, or is a cause simply assumed from sequence or togetherness?",m:[[8,"B came after A, or A and B turned up together, so A caused B. Cottrell's examples go here."],[9,"A and B occur together; a third factor drives both."],[7,"Trends move together by coincidence; no relationship."],[26,"If A then B; B; so A. A logic form, not a trend."]]},
 {id:"logic",title:"Reasoning that doesn't add up",ask:"Does it contradict itself, rest on a false belief, skip a step, or misuse a condition?",m:[[4,"Contradicts itself, or the conclusion ignores its own reasons. Cottrell files the station murder here."],[6,"One hidden assumption bridges evidence to conclusion."],[16,"A chain of unproven steps, or a word switched at the end ('toll' to 'heavy toll')."],[1,"The starting belief is factually wrong."],[10,"One needed condition treated as the whole proof."]]},
 {id:"circle",title:"Going round in circles",ask:"Is it repeating itself, assuming its conclusion, or burying the point in detail?",m:[[21,"Same idea, new words. No argument at all."],[23,"The premise only works if the conclusion is already true."],[5,"Volume of detail that doesn't bear on the claim."]]},
 {id:"ploys",title:"Cottrell's language ploys (p.100)",ask:"What does the wording do: dismiss the need for proof, assume your agreement, sort people into us and them, or stir feeling?",m:[[13,"'Obviously', 'it's 2026'. No proof needed."],[14,"'As we all know'. You already agree."],[15,"'Any decent person'. Opponents are the out-group."],[17,"Loaded words and emotive subjects."],[57,"Many people do it, so it's right."]]},
@@ -369,7 +369,7 @@ const EXTRA = {
 5:{d:"Burying the point in irrelevant detail so it looks well supported.",t:["A long history, but no reason for the claim","'Before I explain...' followed by padding","A thick report that never answers the question"],h:"Wall of text: if you can't convince them, bore them.",w:"Vendor decks with thirty slides before the price."},
 6:{d:"The conclusion doesn't follow; it needs an unstated assumption to work.",t:["'4.8 stars, so it's GDPR compliant'","Evidence about one thing, conclusion about another","You think: wait, how does that follow?"],h:"A bridge with a missing plank.",w:"'The app is popular, so it must be secure.'"},
 7:{d:"Two unrelated trends move together by chance and are treated as linked.",t:["Two trends rise together with no possible connection","'The more X, the more Y', where X and Y have nothing to do with each other","A coincidence presented as a pattern"],h:"Spurious charts: cheese eaten vs. people tangled in bedsheets.",w:"'Spurious correlations' websites and silly infographics."},
-8:{d:"Assuming A caused B just because B happened after A.",t:["'Since...', 'ever since...', 'after we...'","Lucky charms and rituals","'We launched X, then sales rose, so X worked'"],h:"The rooster thinks his crowing makes the sun rise.",w:"Every 'since the new manager joined...' story."},
+8:{d:"Assuming A caused B just because B happened after A, or because they were found together.",t:["'Since...', 'ever since...', 'after we...'","Lucky charms and rituals","'We launched X, then sales rose, so X worked'"],h:"The rooster thinks his crowing makes the sun rise.",w:"Every 'since the new manager joined...' story."},
 9:{d:"Assuming two things that occur together cause each other, ignoring a third factor.",t:["'People who do X have more Y, so do X'","A hidden third factor (summer, wealth, age) drives both","A study's correlation turned into advice"],h:"Ice cream and drownings: summer did it.",w:"'People who drink wine live longer, so drink wine.'"},
 10:{d:"Treating one required condition as enough, or a non-required one as essential.",t:["'You need X to get Y. She has X, so she'll get Y'","'He doesn't have X, so he can't be Y'","Has a lottery ticket, so will be rich"],h:"The lottery ticket: needed to win, not enough to win.",w:"'She's certified, so she'll be a great Scrum Master.'"},
 11:{d:"A big general rule drawn from a tiny sample.",t:["'My two... so all...'","One or two experiences become 'always'","'I tried it once and...'"],h:"One swallow doesn't make a summer.",w:"One bad budget flight, so 'all budget airlines are awful'."},
@@ -380,7 +380,7 @@ const EXTRA = {
 16:{d:"Jumping to a conclusion through unproven steps, or quietly changing the claim at the end.",t:["A chain of 'if... then... then...' where each step is shaky","The conclusion upgrades the claim: 'toll' becomes 'heavy toll'","Two plus two makes five"],h:"Castle of cards: pull one card and it all falls.",w:"'Users like the feature, so they'll pay double for it.'"},
 17:{d:"Loaded words that stir feelings instead of giving reasons.",t:["'Poor little children', 'savage', 'reckless'","Emotive subjects: children, safety, nation, crime","Adjectives doing the arguing"],h:"The violin music playing under the argument.",w:"Tabloid headlines."},
 18:{d:"Attacking the person instead of their argument.",t:["Their private life or past used to dismiss their point","'Why listen to him? He...'","Character attacked, argument ignored"],h:"Play the man, not the ball.",w:"Comment sections."},
-19:{d:"Twisting someone's view into a weaker version, then attacking that.",t:["'So you're saying...' plus an exaggeration","'Apparently she thinks we should never...'","A moderate view turned extreme"],h:"The scarecrow: easy to knock down because it's not the real person.",w:"'You want a pilot first? So you're against innovation.'"},
+19:{d:"Twisting someone's view into a weaker version, then attacking that.",t:["'So you're saying...' plus an exaggeration","'Apparently she thinks we should never...'","A moderate view turned extreme","A person judged on an irrelevant detail while what matters is ignored (Einstein was poor at school maths)"],h:"The scarecrow: easy to knock down because it's not the real person.",w:"'You want a pilot first? So you're against innovation.'"},
 20:{d:"Making a serious or complex issue sound small, or blaming it on one simple cause.",t:["'It's just...', 'simply because...'","A complex problem given one lazy cause","A rare case used to belittle the whole issue"],h:"The shrink ray.",w:"'Burnout is just bad time management.'"},
 21:{d:"Saying the same thing twice in different words, as if it were a reason.",t:["'It failed because it was unsuccessful'","'Boys will be boys', 'It is what it is'","Each sentence restates the one before"],h:"The echo: the argument just repeats itself.",w:"'We need to be more agile to increase our agility.'"},
 22:{d:"Claims with vague, wrong or missing sources.",t:["'Studies show...' (which studies?)","'(Internet, 2024)'","'Experts say' with no name or date"],h:"'Trust me.'",w:"Viral statistics with no link."},
@@ -786,6 +786,9 @@ function drawNotes(){
   <div class="note"><b>Lack of consistency (4) vs non sequitur (6).</b> Cottrell's 'logical consistency' covers conclusions that don't follow from their reasons, which overlaps with non sequitur. The handbook sample keys the station murder passage to Lack of consistency. If both are offered: a contradiction, or a Cottrell passage, points to 4; one specific hidden assumption points to 6.</div>
   <div class="note"><b>Exclusion (15) vs in-group bias (46).</b> Exclusion is a move inside an argument (casting opponents as outsiders). In-group bias is a judgement or reward that favours your own group.</div>
   <div class="note"><b>Trivialisation (20).</b> Cottrell means making a serious matter look minor; the spreadsheet links it to the single-cause fallacy. Both senses map to 20.</div>
+  <div class="note"><b>Causal link (8) vs correlation and causation (9).</b> The module list labels 8 post hoc (after this) and 9 cum hoc (with this). Cottrell's own section for 8 (p.92) is wider: it covers things that happen in sequence and things merely found together (dinosaur prints and geologists; obesity and life expectancy). Cottrell discusses the third factor (warm weather drives ice cream and sandal sales) under correlations on p.93. If both are offered: a Cottrell example, or one thing following another, points to 8; a named third factor driving both points to 9; trends with no possible relationship point to False correlation (7).</div>
+  <div class="note"><b>Unwarranted leaps (16).</b> The module list says 'house of cards'; Cottrell (p.102) says 'castle of cards'. Same idea, same item. Neither is a separate answer.</div>
+  <div class="note"><b>Non sequitur (6) vs affirming the consequent (26).</b> The spreadsheet notes for 6 list affirming the consequent as one kind of non sequitur. If an 'If A then B; B; so A' form is offered with both, pick the specific name, 26.</div>
   <div class="note"><b>Restricted options.</b> Cottrell files 'only two options' under misrepresentation (p.105). The list has False dichotomy (28) as its own item, so pick that if offered.</div>
   <div class="panel stack"><h2>On the day</h2><ul class="tight">
     <li>No negative marking, no going back. Never leave a blank: triage, eliminate, commit at about 40 s.</li></ul></div>`;
