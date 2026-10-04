@@ -1,0 +1,16 @@
+{
+  "name": "Fallacy Diagnosis Drill",
+  "short_name": "Fallacy Drill",
+  "description": "Timed drills for naming fallacies and biases.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5f7",
+  "theme_color": "#1f5fbf",
+  "categories": ["education"],
+  "icons": [
+    {"src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"}
+  ]
+}

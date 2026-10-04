@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Timed drills for naming fallacies and biases.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11161c" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fallacy Drill">
+<title>Fallacy Diagnosis Drill</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<style>
+/* App shell. The drill's own styles load after these and take over. */
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--boot-bg:#f3f5f7;--boot-fg:#5b6876}
+@media (prefers-color-scheme: dark){:root{--boot-bg:#11161c;--boot-fg:#97a4b2}}
+body{margin:0;background:var(--boot-bg)}
+img{max-width:100%}
+.boot{margin:0;padding:24px 16px;font:16px/1.5 "Segoe UI",system-ui,sans-serif;color:var(--boot-fg)}
+</style>
+</head>
+<body>
+<p class="boot" id="boot">Loading the drill...</p>
+<script>
+// The drill lives in ../fallacy-drill.html (the single source). This shell loads it into
+// a proper standalone document, so edits to that file reach the app with no build step.
+(async () => {
+  const boot = document.getElementById("boot");
+  try {
+    const res = await fetch("../fallacy-drill.html", { cache: "no-cache" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+    if (doc.title) document.title = doc.title;
+    doc.head.querySelectorAll("link, style").forEach(n => document.head.appendChild(document.importNode(n, true)));
+    boot.remove();
+    const scripts = [];
+    [...doc.body.childNodes].forEach(n => {
+      if (n.nodeName === "SCRIPT") scripts.push(n);
+      else document.body.appendChild(document.importNode(n, true));
+    });
+    for (const s of scripts) {
+      const el = document.createElement("script");
+      el.textContent = s.textContent;
+      document.body.appendChild(el);
+    }
+  } catch (e) {
+    boot.textContent = "The drill could not load. Open the app once while online so it can save a copy for offline use.";
+  }
+})();
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>

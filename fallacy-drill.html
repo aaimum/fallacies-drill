@@ -1,0 +1,804 @@
+<title>Fallacy Diagnosis Drill</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one working column. Start teaches the three kinds of mistake, Learn introduces families in small batches, Play runs the timed games. Clinical "diagnose the case" feel. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#18212b; --muted:#5b6876; --line:#d8dee5;
+  --accent:#1f5fbf; --accent-soft:#e3ecfa; --ok:#1d7a46; --ok-soft:#e1f2e8; --bad:#b3261e; --bad-soft:#fbe5e3; --warn:#9a6200; --warn-soft:#fbf0d9;
+  --fal:#1f5fbf; --fal-soft:#e3ecfa; --bia:#8a3fa8; --bia-soft:#f3e6f8;
+  --star0:#e3e8ee; --star1:#c7d8f2; --star2:#8fb1e6; --star3:#1f5fbf;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161c; --surface:#19212a; --ink:#e6ebf0; --muted:#97a4b2; --line:#2c3743;
+  --accent:#7aa8f0; --accent-soft:#1d2c44; --ok:#5fc48a; --ok-soft:#17311f; --bad:#f08a80; --bad-soft:#3a1c1a; --warn:#e2b25a; --warn-soft:#352914;
+  --fal:#7aa8f0; --fal-soft:#1d2c44; --bia:#cf9be6; --bia-soft:#2e1f38;
+  --star0:#24303c; --star1:#26405f; --star2:#3c6aa8; --star3:#7aa8f0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161c; --surface:#19212a; --ink:#e6ebf0; --muted:#97a4b2; --line:#2c3743;
+  --accent:#7aa8f0; --accent-soft:#1d2c44; --ok:#5fc48a; --ok-soft:#17311f; --bad:#f08a80; --bad-soft:#3a1c1a; --warn:#e2b25a; --warn-soft:#352914;
+  --fal:#7aa8f0; --fal-soft:#1d2c44; --bia:#cf9be6; --bia-soft:#2e1f38;
+  --star0:#24303c; --star1:#26405f; --star2:#3c6aa8; --star3:#7aa8f0; color-scheme:dark}
+*{box-sizing:border-box} [hidden]{display:none!important}
+td .tells .chip{white-space:normal} table{min-width:560px}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.wrap{max-width:880px;margin:0 auto;padding-inline:16px;padding-block:20px 60px}
+header.top{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+h1{font-family:var(--f-display);font-weight:700;font-size:1.7rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.meta{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+nav.tabs{display:flex;gap:2px;margin:18px 0 16px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav.tabs button{font:600 .95rem var(--f-body);background:none;border:0;color:var(--muted);padding:10px 12px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h2{font-family:var(--f-display);font-weight:700;font-size:1.3rem;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:500;font-size:1.08rem;margin:0}
+p{margin:0}
+.muted{color:var(--muted)} .small{font-size:.86rem}
+.stack{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}
+select{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);max-width:100%}
+.btn{font:700 .95rem var(--f-body);padding:10px 16px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.kind{display:flex;flex-direction:column;gap:8px;border-radius:10px;padding:16px;border:1px solid var(--line);background:var(--surface)}
+.kind .lab{font-family:var(--f-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+.kind.f{border-top:4px solid var(--fal)} .kind.f .lab{color:var(--fal)}
+.kind.b{border-top:4px solid var(--bia)} .kind.b .lab{color:var(--bia)}
+.kind dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.9rem}
+.kind dt{color:var(--muted)} .kind dd{margin:0}
+.flow{display:flex;flex-direction:column;gap:10px}
+.step{display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:start}
+.step .num{font-family:var(--f-mono);font-weight:700;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.branch{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.chip.f{border-color:var(--fal);background:var(--fal-soft)} .chip.b{border-color:var(--bia);background:var(--bia-soft)}
+.chip.tell{font-family:var(--f-body);background:var(--warn-soft);border-color:transparent}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:4px}
+.tile{aspect-ratio:1;max-width:100%;border-radius:6px;display:grid;place-items:center;font-family:var(--f-mono);font-size:.72rem;border:0;cursor:pointer;color:var(--ink)}
+.tile[data-s="0"]{background:var(--star0)} .tile[data-s="1"]{background:var(--star1)} .tile[data-s="2"]{background:var(--star2);color:#fff} .tile[data-s="3"]{background:var(--star3);color:var(--surface)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.fam{display:flex;flex-direction:column;gap:8px;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer}
+.fam:hover{border-color:var(--accent)}
+.fam .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.fam .typ{font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+.fam .typ.f{color:var(--fal)} .fam .typ.b{color:var(--bia)}
+.meter{height:6px;background:var(--star0);border-radius:3px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--star3)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.card .nm{font-family:var(--f-display);font-weight:700;font-size:1.6rem;line-height:1.15;text-wrap:balance}
+.card .def{font-size:1.15rem}
+.card .lbl{font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.hook{border-left:3px solid var(--bia);padding-left:12px;font-style:italic}
+.case{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.casehead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line);font-family:var(--f-mono);font-size:.82rem;color:var(--muted);flex-wrap:wrap}
+.clock{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;font-size:1rem}
+.clock.low{color:var(--bad)}
+.streak{font-weight:700;color:var(--bia)}
+.bar{height:4px;background:var(--line)} .bar i{display:block;height:100%;background:var(--accent);transition:width .25s linear}
+.scen{padding:20px 18px 6px;font-size:1.08rem;line-height:1.6}
+.scen.snap{font-size:1.35rem;font-family:var(--f-display);font-weight:500;padding-top:26px}
+.q{padding:0 18px 12px;color:var(--muted);font-size:.92rem}
+.opts{display:grid;grid-template-columns:1fr;gap:8px;padding:0 18px 18px}
+.opts.two{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:11px 14px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt .k{font-family:var(--f-mono);font-weight:700;color:var(--muted);min-width:1.2em}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)} .opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.fb{margin:0 18px 18px;padding:14px;border-radius:8px;background:var(--bg);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.verdict{font-weight:700} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+.cue{font-size:.93rem} .cue b{font-family:var(--f-display);font-weight:500}
+.pop{font-family:var(--f-mono);font-weight:700;color:var(--ok)}
+.result{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-end}
+.big{font-family:var(--f-display);font-weight:700;font-size:3rem;line-height:1}
+.grade{font-family:var(--f-mono);font-weight:700;font-size:1.6rem;color:var(--accent)}
+.misslist{display:flex;flex-direction:column;gap:10px}
+.miss{border-left:3px solid var(--bad);padding:4px 0 4px 12px;display:flex;flex-direction:column;gap:4px}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg)}
+td.n{font-family:var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.name{font-weight:700;min-width:140px}
+td .tells{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.flag{display:inline-block;font-family:var(--f-mono);font-size:.7rem;padding:1px 6px;border-radius:4px;background:var(--warn-soft);color:var(--warn);margin-left:6px;vertical-align:middle}
+input[type=search]{font:inherit;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;max-width:300px}
+.clusters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:12px}
+.cl{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.cl .ask{font-size:.9rem;color:var(--accent);font-weight:700}
+.cl dl{margin:0;display:grid;grid-template-columns:minmax(110px,38%) 1fr;gap:6px 12px;font-size:.9rem}
+.cl dt{font-weight:700} .cl dd{margin:0}
+.note{background:var(--warn-soft);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:.93rem}
+.note b{color:var(--warn)}
+ul.tight{margin:4px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px}
+.day{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:.9rem;display:flex;flex-direction:column;gap:6px}
+.day b{font-family:var(--f-mono);font-size:.8rem}
+.why{display:grid;grid-template-columns:minmax(120px,30%) 1fr;gap:8px 14px;font-size:.92rem}
+.why dt{font-weight:700} .why dd{margin:0}
+.gradegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px;font-family:var(--f-mono);font-size:.82rem}
+.gradegrid div{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px;text-align:center}
+.gradegrid div.hl{border-color:var(--accent);background:var(--accent-soft)}
+kbd{font-family:var(--f-mono);font-size:.78rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--bg)}
+@media (max-width:520px){.why{grid-template-columns:1fr}.kind dl{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Fallacy Diagnosis Drill</h1>
+    <span class="meta">26 Q · 20 min</span>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="start" aria-selected="true">Start here</button>
+    <button role="tab" data-tab="learn" aria-selected="false">Learn</button>
+    <button role="tab" data-tab="play" aria-selected="false">Play</button>
+    <button role="tab" data-tab="sheet" aria-selected="false">Cheat sheet</button>
+    <button role="tab" data-tab="pairs" aria-selected="false">Look-alikes</button>
+    <button role="tab" data-tab="notes" aria-selected="false">Source notes</button>
+  </nav>
+  <section id="tab-start" class="stack"></section>
+  <section id="tab-learn" class="stack" hidden></section>
+  <section id="tab-play" class="stack" hidden></section>
+  <section id="tab-sheet" class="stack" hidden></section>
+  <section id="tab-pairs" class="stack" hidden></section>
+  <section id="tab-notes" class="stack" hidden></section>
+</div>
+
+<script>
+const ITEMS = [
+{n:1,name:"False premises",src:"Cottrell p.82",cue:"The argument rests on an underlying belief that turns out to be untrue.",s:[
+"A café owner orders three times the usual milk for Saturday because the city marathon will bring thousands of runners past the door. The route is diverted two streets away and sales are normal.",
+"Getting wet in the rain gives you a cold. The squad trained for three hours in a downpour, so expect half of them to be off sick this week."]},
+{n:2,name:"Two wrongs don't make a right",src:"Cottrell p.106",cue:"A wrong is excused because someone else did the same, or did wrong first.",s:[
+"Yes, I padded my expense claim. But the company cut our bonuses without warning, so it evens out.",
+"The opposition can hardly criticise us for appointing party donors to the board. They did exactly the same when they were in power."]},
+{n:3,name:"Stereotyping",src:"Cottrell pp.86-88",cue:"A fixed set of traits attached to a whole group and applied to an individual.",s:[
+"Give the client email to someone else. Tom is an engineer, so his writing will be hopeless.",
+"On the left are the pilots' rest rooms, gentlemen, and the cabin crew rooms are on the right, ladies."]},
+{n:4,name:"Lack of consistency in the argument",src:"Cottrell pp.61-64",cue:"Parts contradict each other, or the conclusion does not follow from the author's own reasons.",s:[
+"There was a murder near the station last night. There are always young lads hanging around there. One of them probably did it. The local council should ban young people from hanging around the station. (Handbook sample)",
+"Remote work destroys productivity and must end. Our best quarter ever was last year, when the whole team was remote.",
+"Coffee helps concentration. Caffeine disrupts focus. Coffee is mostly caffeine, so it cannot help you concentrate."]},
+{n:5,name:"Unnecessary background information",alt:"proof by verbosity",src:"Cottrell pp.50-54",cue:"Piles of detail that do not support the claim, so the volume itself seems to prove it.",s:[
+"Before I explain why we should switch supplier: the firm was founded in Cork in 1987 by two brothers, moved premises twice, redesigned its logo in 2004, and the founders' father was a trawlerman. So clearly they are the right choice.",
+"Asked whether the new system will cut costs, the consultant presents a 40-page deck on the history of ERP and a glossary of cloud terms, with no cost figure anywhere. The board approves it because it looks so thorough."]},
+{n:6,name:"Assumption not supported by the evidence",alt:"non sequitur",src:"Cottrell pp.78-79",cue:"The conclusion jumps across a hidden assumption the evidence does not support.",s:[
+"Our app has a 4.8-star rating in the App Store. Therefore it is GDPR compliant.",
+"It rains a lot in Ireland, so Irish people must be strong swimmers."]},
+{n:7,name:"False correlation",src:"Cottrell p.93",cue:"Two trends move together but have no real relationship at all; pure coincidence.",s:[
+"Phones now come in far more colours than ten years ago, and phone theft has risen too. The wider the colour range, the higher the theft rate.",
+"Since the café started playing jazz, more cyclists have been passing on the street outside. More jazz, more cycling."]},
+{n:8,name:"Incorrectly assuming a causal link",alt:"post hoc ergo propter hoc",src:"Cottrell p.92",cue:"B came after A, so A must have caused B. The tell is the time order.",s:[
+"I wore my new shoes to the interview and got the job. They are my lucky shoes now.",
+"We launched the new logo in March and sales rose in April. The rebrand worked.",
+"A prisoner who protested on the roof was released. That is the second roof protester released this year. Roof protests must be a good way to get out."]},
+{n:9,name:"Confusing correlation and causation",alt:"cum hoc ergo propter hoc",src:"Module sheet",cue:"A and B occur together, so one causes the other. Usually a third factor drives both.",s:[
+"Ice cream sales and drownings rise together, so ice cream must make swimmers careless.",
+"Students who own more books get better grades. Give every student fifty books and grades will rise."]},
+{n:10,name:"Not meeting necessary and sufficient conditions",src:"Cottrell pp.95-97",cue:"One required condition is treated as enough to prove the case, or a non-essential one is treated as required.",s:[
+"You need a ticket to win the lottery. Aisling has bought a ticket, so she is going to be rich.",
+"Raj doesn't have an MBA, so he can't be a good manager.",
+"The report mentions branches, so it must be about trees."]},
+{n:11,name:"Over-generalisation",src:"Cottrell p.123",cue:"A general rule drawn from too small a sample.",s:[
+"My first child slept through the night and my second didn't. First-born children are better sleepers.",
+"I took one online course and it was dull. Online courses don't work."]},
+{n:12,name:"False analogy",alt:"false equivalence",src:"Cottrell p.98",cue:"Two things compared as if alike when they are not alike in the way that matters.",s:[
+"Running a country is just like running a household: you never spend more than you earn, so the government should never borrow.",
+"Human cloning must be banned. It will create another Frankenstein's monster."]},
+{n:13,name:"Deflection",src:"Cottrell p.100",cue:"'Obviously', 'clearly', 'it's 2026!' Language that implies no proof is needed.",s:[
+"Obviously the four-day week is the future. It's 2026, not 1950.",
+"Clearly there's no need to look at the data on this; the answer is self-evident."]},
+{n:14,name:"Complicity",src:"Cottrell p.100",cue:"'As we all know', 'surely we all agree'. The reader is drawn in as if already agreeing.",s:[
+"As we all know, open-plan offices kill concentration, so the redesign should go ahead.",
+"It is well established, and surely we all share the view, that exams are a poor test of ability."]},
+{n:15,name:"Exclusion",src:"Cottrell p.100",cue:"Opponents cast as an out-group: 'any decent person', 'people like them'.",s:[
+"Any sensible parent would support banning phones in schools. The only people objecting are tech lobbyists.",
+"Real Dubliners understand why the congestion charge is needed. It's only blow-ins from the commuter belt who complain."]},
+{n:16,name:"Unwarranted leaps",alt:"castle of cards; sleight of hand",src:"Cottrell p.102",cue:"Two plus two makes five: a chain of unproven steps, or a quiet switch in wording at the conclusion.",s:[
+"Commuters want less traffic. A toll would reduce traffic. So commuters will support a heavy toll.",
+"Speed cameras can't catch every driver, so speeding laws can't be enforced. Laws that can't be enforced shouldn't exist. So speeding isn't really an offence."]},
+{n:17,name:"Emotive language",alt:"loaded language",src:"Cottrell p.103",cue:"Charged words and emotive subjects do the persuading in place of reasons.",s:[
+"Closing the library will leave our poor little children abandoned on the streets, with nowhere safe to go.",
+"This reckless, job-killing tax grab must be stopped."]},
+{n:18,name:"Attacking the person",alt:"ad hominem",src:"Cottrell p.103",cue:"Attacks the person's character or life instead of their argument.",s:[
+"Ignore the CFO's forecast. He went through a very public divorce last year.",
+"The manager says the two new signings will turn the season round. But after that affair splashed across the papers, why believe anything he says?"]},
+{n:19,name:"Misrepresentation",alt:"straw man",src:"Cottrell p.105",cue:"The opponent's view is restated in a distorted or exaggerated form, then that version is attacked.",s:[
+"'We should give pensioners more help with heating bills.' 'So you want the rest of us to hand over our whole salary in tax?'",
+"My colleague says we should pilot the AI tool before rollout. Apparently she thinks we should never adopt any new technology."]},
+{n:20,name:"Trivialisation",alt:"reductionism",src:"Cottrell p.105",cue:"A serious or complex matter made to look minor, or reduced to a single simple cause.",s:[
+"Burnout is just people who can't manage their diaries.",
+"Homelessness exists because some people don't want to work."]},
+{n:21,name:"Tautology",src:"Cottrell p.106",cue:"The same point repeated in different words. The argument goes nowhere.",s:[
+"We need more money for staff training because staff need more training, which is why investment in training is required.",
+"The project failed because it was unsuccessful."]},
+{n:22,name:"Poor referencing",src:"Cottrell pp.113-117",cue:"Claims attributed vaguely, wrongly or uncheckably.",s:[
+"Studies show that 90% of change programmes fail (Internet, 2024).",
+"As experts have long said, remote workers are 40% more productive. (No author, no date, no source given.)"]},
+{n:23,name:"Circular argument",alt:"begging the question",src:"Module sheet",cue:"The conclusion is already assumed in a premise.",s:[
+"The CEO is trustworthy because he says so, and he wouldn't lie because he is trustworthy.",
+"This newspaper is reliable because it says it only prints the truth."]},
+{n:24,name:"Pathetic fallacy",src:"Module sheet",cue:"Human feelings or intentions given to nature or objects.",s:[
+"The sea was angry that night, punishing the little boat for daring to leave the harbour.",
+"The printer hates me. It always jams the night before a deadline."]},
+{n:25,name:"Fundamental attribution error",src:"Module sheet",cue:"Someone else's behaviour blamed on their character, ignoring their situation.",s:[
+"The new hire missed stand-up twice this week. He's just lazy. (It was the week of the bus strike.)",
+"That driver cut across my lane. What a selfish person."]},
+{n:26,name:"Affirming the consequent",src:"Module sheet; Lee (2025)",cue:"If A then B. B is true. Therefore A.",s:[
+"If it had rained, the street would be wet. The street is wet. So it rained.",
+"Well-governed firms pass their audits. Firm X passed its audit, so it must be well governed."]},
+{n:27,name:"Conflation",src:"Module sheet",cue:"Two distinct ideas merged as if they were one.",s:[
+"She's always busy, so she must be productive.",
+"He has 20,000 LinkedIn followers, so he's clearly an expert in his field."]},
+{n:28,name:"False dichotomy",src:"Module sheet",cue:"Only two options offered when others exist.",s:[
+"Either we put a 10 pm curfew on all teenagers or we accept savage assaults on our streets.",
+"You're either behind this restructure or you're against the company."]},
+{n:29,name:"Self-serving bias",src:"Module sheet",cue:"My successes come from my ability; my failures come from outside factors.",s:[
+"We hit target this quarter because of my strategy. Last quarter we missed because the market turned.",
+"I got an A on the essay because I write well. The C in statistics was the lecturer's unfair marking."]},
+{n:30,name:"Confirmation bias",alt:"belief bias",src:"Module sheet",cue:"Seeks out or notices only evidence that fits what you already think.",s:[
+"Convinced the new analyst is weak, the manager logs every mistake she makes and none of her wins.",
+"I searched 'is coffee good for you' and read the first five articles that said yes."]},
+{n:31,name:"Hindsight bias",src:"Module sheet",cue:"'I knew it all along', said after the outcome is known.",s:[
+"After the start-up collapsed, the investor said the warning signs had been obvious from day one.",
+"Once the result was announced, half the office claimed they had always known the merger would fail."]},
+{n:32,name:"Availability heuristic",src:"Module sheet",cue:"Likelihood judged by how easily examples spring to mind: recent, vivid, memorable.",s:[
+"After watching a documentary on air crashes, Mark drives from Dublin to the south of France instead of flying.",
+"Two friends were burgled last month, so Priya reckons one house in three on her street gets burgled each year."]},
+{n:33,name:"Representativeness heuristic",src:"Module sheet",cue:"Probability judged by how closely something resembles a typical case.",s:[
+"Ciara is quiet, tidy and loves reading, so she is probably a librarian rather than a salesperson.",
+"Asked which coin sequence is more likely, HHHHHH or HTTHTH, most people pick the second because it looks more random."]},
+{n:34,name:"Anchoring bias",src:"Module sheet",cue:"The first number offered sticks and drags later estimates towards it.",s:[
+"The seller opened at €12,000, so €9,500 felt like a bargain, though similar cars sell for €7,000.",
+"People first asked whether the Shannon is longer or shorter than 1,000 km then guess its length far higher than people first asked about 100 km."]},
+{n:35,name:"Conjunction fallacy",src:"Module sheet",cue:"'A and B' judged more likely than 'A' on its own.",s:[
+"Aoife studied philosophy and campaigned on social justice. People rate 'Aoife is a bank teller and active in the feminist movement' as more likely than 'Aoife is a bank teller'.",
+"Analysts rate 'a strike that shuts Dublin Airport for a week' as more likely than 'a strike at Dublin Airport'."]},
+{n:36,name:"Groupthink",src:"Module sheet",cue:"A close-knit group suppresses doubts to keep harmony; unanimity is an illusion.",s:[
+"No one on the close-knit board raised concerns about the acquisition. The one director with doubts kept quiet so as not to spoil the mood.",
+"Team members privately thought the launch date was impossible, but everyone nodded it through because the lead was so enthusiastic."]},
+{n:37,name:"Risky shift",src:"Module sheet",cue:"After discussion, a group chooses something riskier than its members would alone.",s:[
+"Asked separately, each trustee would put 10% of the fund into crypto. After discussing it together they vote for 40%.",
+"None of the friends would jump off the pier on their own, but after egging each other on the whole group jumps."]},
+{n:38,name:"Misplaced concreteness",alt:"reification",src:"Module sheet",cue:"An abstraction treated as a concrete thing or as an agent with wants.",s:[
+"The market wants lower interest rates, and it will punish any government that ignores it.",
+"IQ is a fixed object inside your head, and the test simply weighs it, like a scale weighs flour."]},
+{n:39,name:"Framing effects",alt:"equivalency frames",src:"Module sheet",cue:"Identical facts, different choice, depending on positive or negative wording.",s:[
+"Patients accept an operation described as having a 90% survival rate but refuse the same operation described as having a 10% mortality rate.",
+"Shoppers prefer mince labelled '95% fat-free' to the same mince labelled '5% fat'."]},
+{n:40,name:"Sunk cost fallacy",src:"Module sheet",cue:"Carrying on because of what has already been spent, not because of future value.",s:[
+"We've spent €2 million on this system, so we can't stop now, even though switching would cost less from here.",
+"I paid for the concert ticket, so I'll go, even though I'm ill and won't enjoy it."]},
+{n:41,name:"Dunning-Kruger effect",src:"Module sheet",cue:"Low skill in a domain leads to overestimating one's own ability in it.",s:[
+"After one weekend of YouTube tutorials, Dan tells the board he can build the data platform himself in a fortnight.",
+"Students with the lowest scores on a logic test rated their performance as above average."]},
+{n:42,name:"Belief perseverance",src:"Module sheet",cue:"A belief survives even after the evidence it rested on is discredited.",s:[
+"The manager learns the report rating the supplier as unreliable used another firm's data. She still refuses to use them.",
+"Participants were told afterwards that their 'excellent' feedback scores were random. They still believed they were good at spotting fake reviews."]},
+{n:43,name:"Barnum effect",alt:"Forer effect",src:"Module sheet",cue:"A vague description that fits almost anyone is felt to be personally accurate.",s:[
+"'You have a lot of untapped potential and sometimes doubt whether you made the right decision.' Mia says the horoscope describes her exactly.",
+"A personality quiz tells every user they are 'independent, but value close relationships'. Nine in ten rate it highly accurate."]},
+{n:44,name:"Declinism",src:"Module sheet",cue:"The past was better; things are steadily getting worse.",s:[
+"Students today can't concentrate like we could. Universities have been going downhill for decades.",
+"Nothing good has been made in music since the nineties."]},
+{n:45,name:"Just-world hypothesis",src:"Module sheet",cue:"People get what they deserve, so victims must have earned it.",s:[
+"If he lost his job, he must have done something to deserve it.",
+"Anyone who gets scammed online was asking for it."]},
+{n:46,name:"In-group bias",src:"Module sheet",cue:"Favouring members of your own group in judgements or rewards.",s:[
+"The hiring panel, all Smurfit alumni, rated the Smurfit candidate higher on 'fit' despite identical scores.",
+"Asked to split a bonus pool, staff give more to colleagues from their own department."]},
+{n:47,name:"Halo effect",src:"Module sheet",cue:"One good trait spills over into judgements of unrelated traits.",s:[
+"He's so articulate and well dressed; he must be honest and good with budgets.",
+"The company makes beautiful phones, so its banking app must be secure."]},
+{n:48,name:"Curse of knowledge",alt:"curse of expertise",src:"Module sheet",cue:"An expert cannot imagine not knowing, so assumes others share the knowledge.",s:[
+"The data architect tells new joiners to 'just join the fact table on the surrogate key' and can't see why they look lost.",
+"The professor sets what she calls a simple warm-up question. Nobody in the class understands it."]},
+{n:49,name:"Appeal to consequences",src:"Module sheet",cue:"A claim judged true or false by whether its consequences would be welcome.",s:[
+"AI can't be about to replace junior analysts, because that would be terrible for graduates.",
+"There can't be a recession next year. It would ruin my investment plans."]},
+{n:50,name:"Appeal to ignorance",src:"Module sheet",cue:"Not proven false, so it's true (or not proven true, so it's false).",s:[
+"No one has shown the new supplement is harmful, so it must be safe.",
+"Nobody has proved ghosts don't exist, so they probably do."]},
+{n:51,name:"Slippery slope",src:"Module sheet",cue:"One small step will inevitably slide to an extreme outcome.",s:[
+"If we let staff work from home on Fridays, soon nobody will come in at all, the office will close and the company will collapse.",
+"Accept one late assignment and before long no one will meet any deadline."]},
+{n:52,name:"Negativity bias",src:"Module sheet",cue:"One negative outweighs many positives.",s:[
+"After nineteen glowing reviews and one complaint, the manager can think only about the complaint.",
+"Lena remembers the one presentation that went badly, not the ten that went well."]},
+{n:53,name:"Optimism bias",src:"Module sheet",cue:"'It won't happen to me.' Underrating one's own risk.",s:[
+"Most new restaurants close within three years, but Tom is sure his won't.",
+"Drivers rate their own chance of a crash as far below the average driver's."]},
+{n:54,name:"Gambler's fallacy",src:"Module sheet",cue:"Past independent outcomes are thought to change the next one: something is 'due'.",s:[
+"Red has come up six times in a row, so black is due.",
+"We've had three boys, so the next baby is bound to be a girl."]},
+{n:55,name:"Reactance bias",src:"Module sheet",cue:"Doing the opposite of what you're told because your freedom of choice feels threatened.",s:[
+"When the council banned parking in the lane, residents who had never parked there started doing it.",
+"Told the book is banned from the school library, the students all buy a copy."]},
+{n:56,name:"Spotlight effect",src:"Module sheet",flag:"Two senses",cue:"Overestimating how much others notice you. The module sheet also uses it for heavily publicised cases taken to represent a whole group.",s:[
+"Kev arrives at the lecture with a coffee stain on his shirt and is sure everyone is staring. Afterwards, nobody had noticed.",
+"After weeks of headlines about three e-scooter riders injuring pedestrians, a councillor declares that e-scooter users in general are a danger."]},
+{n:57,name:"Bandwagon effect",alt:"ad populum",src:"Module sheet",cue:"Believing or doing something because many others do.",s:[
+"Everyone in our cohort is buying the new laptop, so it must be the best one.",
+"Ten million people take this supplement. It must work."]},
+{n:58,name:"Presentism",src:"Module sheet",flag:"Sheet note unclear",cue:"Judging past people or events by today's values or knowledge.",s:[
+"Managers in the 1960s were fools for not using email.",
+"Medieval doctors were stupid for bleeding their patients."]},
+{n:59,name:"Base rate fallacy",src:"Module sheet",cue:"The general prevalence figure is given and then ignored for the specific case.",s:[
+"A disease affects 1 in 1,000 people. A test for it is 99% accurate. Sam tests positive and concludes he is 99% likely to have it.",
+"85% of a city's taxis are green and 15% blue. A witness, right 80% of the time, says the cab was blue, so the jury is 80% sure it was blue."]},
+{n:60,name:"Fallacy of composition",src:"Module sheet",cue:"What is true of the parts must be true of the whole.",s:[
+"Every player on the team is a star, so the team will win the league.",
+"Each brick is light, so the wall is light too."]}
+];
+
+const CLUSTERS = [
+{id:"cause",title:"Cause and link",ask:"Is there a time order, a shared hidden cause, or no relationship at all?",m:[[8,"B came after A (time order)."],[9,"A and B occur together; a third factor drives both."],[7,"Trends move together by coincidence; no relationship."],[26,"If A then B; B; so A. A logic form, not a trend."]]},
+{id:"logic",title:"Reasoning that doesn't add up",ask:"Does it contradict itself, rest on a false belief, skip a step, or misuse a condition?",m:[[4,"Contradicts itself, or the conclusion ignores its own reasons. Cottrell files the station murder here."],[6,"One hidden assumption bridges evidence to conclusion."],[16,"A chain of unproven steps, or a word switched at the end ('toll' to 'heavy toll')."],[1,"The starting belief is factually wrong."],[10,"One needed condition treated as the whole proof."]]},
+{id:"circle",title:"Going round in circles",ask:"Is it repeating itself, assuming its conclusion, or burying the point in detail?",m:[[21,"Same idea, new words. No argument at all."],[23,"The premise only works if the conclusion is already true."],[5,"Volume of detail that doesn't bear on the claim."]]},
+{id:"ploys",title:"Cottrell's language ploys (p.100)",ask:"What does the wording do: dismiss the need for proof, assume your agreement, sort people into us and them, or stir feeling?",m:[[13,"'Obviously', 'it's 2026'. No proof needed."],[14,"'As we all know'. You already agree."],[15,"'Any decent person'. Opponents are the out-group."],[17,"Loaded words and emotive subjects."],[57,"Many people do it, so it's right."]]},
+{id:"attack",title:"Attacking and distorting",ask:"Is the target the person, a distorted version of the view, the size of the issue, or the range of options?",m:[[18,"The person, not the argument."],[19,"A distorted version of what they said."],[20,"Serious made trivial, or many causes reduced to one."],[28,"Only two options on the table."],[2,"'They did it too.'"]]},
+{id:"general",title:"Parts, groups and individuals",ask:"Which direction does the reasoning run: few cases to a rule, group to person, or parts to whole?",m:[[11,"Few cases, then a general rule."],[3,"An existing group label applied to one person."],[60,"Each part has it, so the whole has it."],[56,"Highly publicised cases taken as the whole group (module sheet sense)."]]},
+{id:"prob",title:"Probability",ask:"Was a statistic ignored, a combination preferred, a prototype matched, a streak trusted, or a vivid case recalled?",m:[[59,"A prevalence figure is given and ignored."],[35,"'A and B' rated above 'A' alone."],[33,"Looks like the typical case, so it's likely."],[54,"Independent events; something is 'due'."],[32,"Easy to recall, so it seems frequent."]]},
+{id:"blame",title:"Explaining behaviour",ask:"Whose behaviour, and what is it pinned on?",m:[[25,"Someone else's act blamed on character, not situation."],[29,"My wins are skill, my losses are bad luck."],[45,"They deserved what happened."],[47,"One good trait colours everything else."],[46,"My group gets the better rating."]]},
+{id:"belief",title:"Protecting what you already think",ask:"Is the person filtering evidence, holding on after the evidence collapsed, defending past spend, or rewriting what they predicted?",m:[[30,"Looks for and notices only supporting evidence."],[42,"The evidence was discredited; the belief stayed."],[40,"Money or effort already spent drives the decision."],[31,"'Knew it all along', after the fact."]]},
+{id:"self",title:"Misjudging yourself",ask:"Is it about skill, risk, attention, a vague profile, or what others know?",m:[[41,"Unskilled, so overconfident in that skill."],[53,"Bad things happen to others, not me."],[56,"Everyone is noticing me (psychology sense)."],[43,"A generic profile feels tailor-made."],[48,"I know it, so everyone must."]]},
+{id:"group",title:"Groups deciding",ask:"Is dissent being suppressed, risk escalating, or people simply following the crowd?",m:[[36,"Harmony over dissent; silent doubters."],[37,"Group lands on a riskier choice than individuals would."],[57,"Doing it because many others do."],[46,"Favouring your own group."]]},
+{id:"framing",title:"Numbers, wording and weight",ask:"Did a first number pull the estimate, did the wording flip the choice, or did one bad item outweigh the rest?",m:[[34,"First number drags the estimate."],[39,"Same facts, gain or loss wording flips the choice."],[52,"One negative outweighs many positives."]]},
+{id:"time",title:"Past and present",ask:"Is the past being praised, judged by today's standards, or 'predicted' after the event?",m:[[44,"It used to be better."],[58,"Past judged by present values or knowledge."],[31,"Outcome seemed predictable only afterwards."]]},
+{id:"conseq",title:"Arguing from outcomes",ask:"Is it a predicted chain of events, wishful truth, missing proof, or a backlash against being told what to do?",m:[[51,"Small step, inevitable extreme end."],[49,"True or false because of how welcome the outcome is."],[50,"No proof against it, so it's true."],[55,"Told not to, so they do."]]},
+{id:"abstract",title:"Abstractions and comparisons",ask:"Is an idea treated as a thing, nature given feelings, two concepts merged, or two things compared?",m:[[38,"An abstraction ('the market') acts like a thing."],[24,"Nature or objects given human feelings."],[27,"Two separate ideas treated as one."],[12,"A comparison of things that aren't alike."]]}
+];
+
+// Plain meaning (d), giveaway words (t), memory hook (h), where you'll meet it (w)
+const EXTRA = {
+1:{d:"The argument is built on a starting belief that isn't true.",t:["Rests on 'everyone knows rain gives you colds'","The plan assumed something that turned out false","'This was based on the idea that...' and the idea was wrong"],h:"Cracked foundation: the house looks fine, the ground under it is wrong.",w:"Business cases built on a market forecast nobody checked."},
+2:{d:"Excusing a wrong because someone else did wrong too.",t:["'They did it too'","'They started it'","'It evens out'"],h:"Playground logic: 'But he hit me first!'",w:"A party defending a scandal by pointing at the other party's."},
+3:{d:"Judging one person by a fixed label for their whole group.",t:["'He's an engineer, so he can't write'","'Typical [group]'","A role assumed from gender, age or job"],h:"A label stuck on someone's forehead.",w:"'Ask the youngest in the team, she'll know social media.'"},
+4:{d:"The argument contradicts itself, or its conclusion doesn't fit its own reasons.",t:["Says X, then says not-X","Reasons point one way, the conclusion goes another","Murder near the station, so ban all young people"],h:"The argument trips over its own feet.",w:"A memo praising agility that adds three new approval gates."},
+5:{d:"Burying the point in irrelevant detail so it looks well supported.",t:["A long history, but no reason for the claim","'Before I explain...' followed by padding","A thick report that never answers the question"],h:"Wall of text: if you can't convince them, bore them.",w:"Vendor decks with thirty slides before the price."},
+6:{d:"The conclusion doesn't follow; it needs an unstated assumption to work.",t:["'4.8 stars, so it's GDPR compliant'","Evidence about one thing, conclusion about another","You think: wait, how does that follow?"],h:"A bridge with a missing plank.",w:"'The app is popular, so it must be secure.'"},
+7:{d:"Two unrelated trends move together by chance and are treated as linked.",t:["Two trends rise together with no possible connection","'The more X, the more Y', where X and Y have nothing to do with each other","A coincidence presented as a pattern"],h:"Spurious charts: cheese eaten vs. people tangled in bedsheets.",w:"'Spurious correlations' websites and silly infographics."},
+8:{d:"Assuming A caused B just because B happened after A.",t:["'Since...', 'ever since...', 'after we...'","Lucky charms and rituals","'We launched X, then sales rose, so X worked'"],h:"The rooster thinks his crowing makes the sun rise.",w:"Every 'since the new manager joined...' story."},
+9:{d:"Assuming two things that occur together cause each other, ignoring a third factor.",t:["'People who do X have more Y, so do X'","A hidden third factor (summer, wealth, age) drives both","A study's correlation turned into advice"],h:"Ice cream and drownings: summer did it.",w:"'People who drink wine live longer, so drink wine.'"},
+10:{d:"Treating one required condition as enough, or a non-required one as essential.",t:["'You need X to get Y. She has X, so she'll get Y'","'He doesn't have X, so he can't be Y'","Has a lottery ticket, so will be rich"],h:"The lottery ticket: needed to win, not enough to win.",w:"'She's certified, so she'll be a great Scrum Master.'"},
+11:{d:"A big general rule drawn from a tiny sample.",t:["'My two... so all...'","One or two experiences become 'always'","'I tried it once and...'"],h:"One swallow doesn't make a summer.",w:"One bad budget flight, so 'all budget airlines are awful'."},
+12:{d:"Comparing two things that aren't alike in the way that matters.",t:["'X is just like Y'","'It's like...' doing all the work","Country = household, staff = machines, cloning = Frankenstein"],h:"Apples and oranges dressed up as twins.",w:"'Running a start-up is like going to war.'"},
+13:{d:"Words that suggest no proof is needed.",t:["'Obviously', 'clearly', 'of course'","'It's 2026!', 'This isn't the 1950s'","'Needless to say...'"],h:"The magician's wave: look away from the reasoning.",w:"LinkedIn posts that start with 'Obviously...'"},
+14:{d:"Talking as if you already agree, to pull you in.",t:["'As we all know...'","'Surely we can all agree...'","'Everyone knows that...'"],h:"The arm round your shoulder: we're on the same side, right?",w:"Town-hall speeches: 'we all want what's best'."},
+15:{d:"Painting opponents as outsiders so you won't want to side with them.",t:["'Any decent person would...'","'Only lobbyists / outsiders object'","'People like us' versus 'people like them'"],h:"The velvet rope: agree, or you're outside the club.",w:"'Real fans would never...'"},
+16:{d:"Jumping to a conclusion through unproven steps, or quietly changing the claim at the end.",t:["A chain of 'if... then... then...' where each step is shaky","The conclusion upgrades the claim: 'toll' becomes 'heavy toll'","Two plus two makes five"],h:"Castle of cards: pull one card and it all falls.",w:"'Users like the feature, so they'll pay double for it.'"},
+17:{d:"Loaded words that stir feelings instead of giving reasons.",t:["'Poor little children', 'savage', 'reckless'","Emotive subjects: children, safety, nation, crime","Adjectives doing the arguing"],h:"The violin music playing under the argument.",w:"Tabloid headlines."},
+18:{d:"Attacking the person instead of their argument.",t:["Their private life or past used to dismiss their point","'Why listen to him? He...'","Character attacked, argument ignored"],h:"Play the man, not the ball.",w:"Comment sections."},
+19:{d:"Twisting someone's view into a weaker version, then attacking that.",t:["'So you're saying...' plus an exaggeration","'Apparently she thinks we should never...'","A moderate view turned extreme"],h:"The scarecrow: easy to knock down because it's not the real person.",w:"'You want a pilot first? So you're against innovation.'"},
+20:{d:"Making a serious or complex issue sound small, or blaming it on one simple cause.",t:["'It's just...', 'simply because...'","A complex problem given one lazy cause","A rare case used to belittle the whole issue"],h:"The shrink ray.",w:"'Burnout is just bad time management.'"},
+21:{d:"Saying the same thing twice in different words, as if it were a reason.",t:["'It failed because it was unsuccessful'","'Boys will be boys', 'It is what it is'","Each sentence restates the one before"],h:"The echo: the argument just repeats itself.",w:"'We need to be more agile to increase our agility.'"},
+22:{d:"Claims with vague, wrong or missing sources.",t:["'Studies show...' (which studies?)","'(Internet, 2024)'","'Experts say' with no name or date"],h:"'Trust me.'",w:"Viral statistics with no link."},
+23:{d:"The conclusion is hidden inside the reason given for it.",t:["'Trustworthy because he says he's trustworthy'","'Reliable because it says it's reliable'","Proof that only works if you already believe the answer"],h:"A snake eating its own tail.",w:"'Our process is best practice because it's the process we use.'"},
+24:{d:"Giving human feelings to nature or objects.",t:["'The angry sea', 'the weeping sky'","'The printer hates me'","Weather or objects with moods or intentions"],h:"Moody weather.",w:"Song lyrics and poetry: 'the skies wept'."},
+25:{d:"Blaming someone's character for what their situation caused.",t:["'He's late, he's lazy'","Rude driver, so bad person","A situation is mentioned (strike, illness) and then ignored"],h:"Them: 'lazy'. Me: 'traffic'.",w:"Judging a colleague who misses a deadline."},
+26:{d:"Reasoning backwards: if A then B; B is true; so A must be true.",t:["'If it rained, the street is wet. It's wet, so it rained'","A result taken as proof of one particular cause","An if-then rule run in reverse"],h:"Wet street, so it rained (or a pipe burst).",w:"'Good firms pass audits. They passed, so they're good.'"},
+27:{d:"Treating two different ideas as if they were the same thing.",t:["'Busy, so productive'","'Popular, so expert'","Two related words swapped as if equal"],h:"Two ideas through one blender.",w:"'Data-driven' used to mean 'has a dashboard'."},
+28:{d:"Only two options offered when there are more.",t:["'Either... or...'","'You're with us or against us'","No middle ground, no third option"],h:"Two doors painted on a wall that has many exits.",w:"'Back to the office full time, or lose your job.'"},
+29:{d:"Taking the credit for success, blaming outside factors for failure.",t:["'Because of my strategy' / 'because the market turned'","Wins are mine, losses are bad luck","A good grade is skill, a bad one is the marker"],h:"Heads I win, tails it's luck.",w:"Quarterly reviews."},
+30:{d:"Only looking for, or noticing, evidence that fits what you already believe.",t:["Logs only the mistakes","Searches with the question worded to get a yes","Ignores evidence on the other side"],h:"Yes-glasses: you only see what agrees with you.",w:"Your social media feed."},
+31:{d:"Believing, after the event, that you saw it coming.",t:["'I knew it all along'","'The signs were obvious'","Said only once the outcome is known"],h:"The rear-view mirror is always 20/20.",w:"Every post-match pundit."},
+32:{d:"Judging how common something is by how easily examples come to mind.",t:["After a documentary / the news / a friend's story...","Vivid or recent cases drive the estimate","Avoids flying after hearing about a crash"],h:"What's top of mind feels like the whole world.",w:"Fear of sharks after watching a shark film."},
+33:{d:"Judging probability by how much something looks like a typical case.",t:["'Quiet, glasses, loves books: a librarian'","'It looks more random, so it's more likely'","Fits the picture of the type"],h:"Looks like a duck, so it's a duck (even where ducks are rare).",w:"Judging a start-up by whether its founder looks like a founder."},
+34:{d:"The first number you hear drags your estimate towards it.",t:["Opening price, then 'a bargain'","'More or less than 1,000?' and then the guess","A starting figure that shouldn't matter, but does"],h:"A ship's anchor: you can't drift far from the first number.",w:"'Was €200, now €99.'"},
+35:{d:"Thinking 'A and B' is more likely than A on its own.",t:["Two conditions joined by 'and' rated more likely","Linda the bank teller","More detail, rated more probable"],h:"Every detail you add can only lower the odds.",w:"Stories that feel more believable the more detail they add."},
+36:{d:"A close group goes along with the plan to keep the peace; doubts stay unspoken.",t:["Nobody raised concerns","Privately disagreed, publicly nodded","Close-knit, keen to keep the mood"],h:"The nodding dogs on a car dashboard.",w:"Meetings where nobody challenges the boss."},
+37:{d:"A group chooses something riskier than each member would alone.",t:["Alone 10%, together 40%","'Egging each other on'","Responsibility feels shared"],h:"Dared on by the gang.",w:"Friends daring each other into something."},
+38:{d:"Treating an idea or abstraction as if it were a physical thing or a person.",t:["'The market wants...'","'Society demands...', 'the economy decided...'","An abstract idea given desires or a body"],h:"Turning a ghost into a statue.",w:"'The data tells us what to do.'"},
+39:{d:"The same facts lead to different choices depending on how they're worded.",t:["'90% survive' versus '10% die'","'95% fat-free' versus '5% fat'","Gain wording versus loss wording of identical facts"],h:"Glass half full or half empty.",w:"'Save €50' versus 'Don't lose €50'."},
+40:{d:"Carrying on because of what you've already spent, not what you'll get.",t:["'We've already spent...'","'We can't stop now'","'I paid for it, so I'll go'"],h:"Throwing good money after bad.",w:"Finishing a bad film because you're halfway through."},
+41:{d:"The less you know about something, the more you overrate your skill at it.",t:["One weekend of tutorials, then 'I can build it'","Lowest scorers rate themselves above average","Beginner's confidence in that specific skill"],h:"Mount Stupid: the peak of confidence at the start.",w:"Armchair experts."},
+42:{d:"Keeping a belief after the evidence for it has been shown to be wrong.",t:["The data was wrong or retracted; the belief stays","'Told the results were fake, they still believed'","The reason is gone, but the opinion isn't"],h:"The house still standing after its foundation is removed.",w:"Myths that survive being debunked."},
+43:{d:"Believing a vague description that fits everyone is specially about you.",t:["The horoscope 'describes me exactly'","'You have untapped potential'","A personality quiz feels spot-on"],h:"The fortune teller's one-size-fits-all reading.",w:"Personality quizzes online."},
+44:{d:"Believing things were better before and are getting worse.",t:["'Kids today...'","'Going downhill for decades'","'Nothing good since the 90s'"],h:"Rose-tinted rear-view mirror.",w:"'Workplaces had loyalty back then.'"},
+45:{d:"Believing people get what they deserve, so victims must have earned it.",t:["'Must have done something to deserve it'","'Asking for it'","Bad outcome, so bad person"],h:"The karma accountant.",w:"Blaming people for being poor."},
+46:{d:"Favouring people from your own group.",t:["Same school or department rated higher","More of the bonus to my own team","Equal scores, but 'our' candidate wins"],h:"The home-team referee.",w:"Hiring for 'culture fit'."},
+47:{d:"One good quality makes you assume other, unrelated good qualities.",t:["Well dressed, so honest","Good at X, so must be good at unrelated Y","Articulate and attractive, so competent"],h:"The angel's halo lights up everything around it.",w:"Celebrity endorsements."},
+48:{d:"Experts forget what it's like not to know, and assume others know too.",t:["Jargon to beginners, then puzzled why they're lost","A 'simple' question nobody can answer","Assumes others share their knowledge"],h:"You can't un-ring a bell.",w:"IT help desks."},
+49:{d:"Deciding a claim is true or false by whether you'd like the result.",t:["'It can't be true, because that would be terrible'","'It must be true, otherwise...'","A wish decides the fact"],h:"Wishful truth.",w:"'The project can't be late; the CEO has announced the date.'"},
+50:{d:"Treating 'no proof against it' as proof for it.",t:["'No one has proved it's harmful, so it's safe'","'You can't prove I'm wrong'","Absence of evidence used as evidence"],h:"The empty room 'proves' the ghost is invisible.",w:"Conspiracy theories."},
+51:{d:"Claiming one small step will lead to disaster, without showing how.",t:["'If we allow X, soon... then... and finally...'","'Before long nobody will...'","A small step with an extreme ending"],h:"The first domino.",w:"Policy debates."},
+52:{d:"Bad things weigh more in your mind than equally sized good things.",t:["Nineteen good reviews, fixated on one bad one","Remembers the one failure","One criticism outweighs the praise"],h:"Velcro for bad news, Teflon for good.",w:"Performance reviews."},
+53:{d:"Believing bad things are less likely to happen to you than to others.",t:["'Most fail, but mine won't'","'It won't happen to me'","Rates own risk below average"],h:"Rose-tinted crystal ball.",w:"Project timelines."},
+54:{d:"Thinking past random results change the odds of the next one.",t:["'Due', 'bound to'","Six reds, so black is next","A streak of independent events"],h:"The roulette wheel has no memory.",w:"'I've lost five times, I'm due a win.'"},
+55:{d:"Doing the opposite because you feel your freedom of choice is being limited.",t:["Banned, so now they want it","'Don't read this' makes them read it","Pushback against being told what to do"],h:"Forbidden fruit.",w:"'Do not press' buttons."},
+56:{d:"Overestimating how much other people notice you. (Module sheet: well-publicised cases taken to stand for a whole group.)",t:["'Everyone was staring at me'","A coffee stain or bad hair day that nobody noticed","Headline cases taken to represent the whole group"],h:"A stage light only you can see.",w:"Worrying about a typo in a group email."},
+57:{d:"Believing or doing something because lots of other people do.",t:["'Everyone is buying it'","'Millions use it, so it works'","Popularity treated as proof"],h:"Jumping on the parade wagon.",w:"Trending products."},
+58:{d:"Judging the past by today's values or knowledge.",t:["'People back then were fools for...'","The past judged by modern standards","Expecting old decisions to use today's knowledge"],h:"The time-travelling critic.",w:"'Why didn't they just use computers?'"},
+59:{d:"Ignoring how common something is overall when judging one case.",t:["A population percentage is given, then ignored","'1 in 1,000 have it; the test is 99% accurate'","A specific detail beats the general statistic"],h:"Forgetting the size of the haystack.",w:"Panicking at a positive screening test."},
+60:{d:"Assuming the whole has the same qualities as its parts.",t:["'Every player is a star, so the team...'","Each part is X, so the whole is X","Parts to whole"],h:"Light bricks, so a light wall.",w:"'Hire all the top performers and you'll have a top team.'"}
+};
+ITEMS.forEach(i=>Object.assign(i, EXTRA[i.n]));
+const BY = Object.fromEntries(ITEMS.map(i=>[i.n,i]));
+
+const FAM = [
+{id:"words",name:"Word tricks",k:"f",gist:"The wording does the persuading, not the reasons.",m:[13,14,15,17,5,22,21]},
+{id:"fight",name:"Dirty fighting",k:"f",gist:"Attack, twist or corner the other side instead of answering it.",m:[18,19,20,2,28,51,49,50]},
+{id:"logic",name:"Broken logic",k:"f",gist:"The steps from the reasons to the conclusion don't hold.",m:[1,4,6,16,10,23,26,27]},
+{id:"cause",name:"Fake cause, bad comparison",k:"f",gist:"Wrong links: causes, correlations, comparisons, parts and groups.",m:[8,9,7,12,11,3,60,38,24]},
+{id:"odds",name:"Odds and numbers",k:"b",gist:"Mental shortcuts that misjudge probability, value or risk.",m:[32,33,59,35,54,34,39]},
+{id:"people",name:"Judging people and groups",k:"b",gist:"How we explain other people, and how groups decide.",m:[25,45,47,46,36,37,57]},
+{id:"me",name:"Me, myself",k:"b",gist:"How we misjudge ourselves.",m:[29,41,53,56,48,43,55]},
+{id:"stuck",name:"Stuck in the past",k:"b",gist:"Holding on to beliefs, spending, memories and the good old days.",m:[30,42,40,31,52,44,58]}
+];
+const FAM_OF = {}; FAM.forEach(f=>f.m.forEach(n=>FAM_OF[n]=f));
+const ITEM_CL = {}; CLUSTERS.forEach(c=>c.m.forEach(([n])=>{(ITEM_CL[n] ||= []).push(c.id)}));
+
+const GRADES = {26:"A+",25:"A",24:"A-",23:"B+",22:"B",21:"B-",20:"C+",19:"C",18:"C-",17:"D+",16:"D",15:"D-",14:"E+",13:"E",12:"E-",11:"F+",10:"F",9:"F-",8:"G+",7:"G"};
+const grade = s => GRADES[s] || "G-";
+
+// ---------- per-viewer progress (browser only) ----------
+const LS = {get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let STARS = LS.get("fdd-stars",{});  // n -> 0..3
+let SEEN = LS.get("fdd-seen",{});    // n -> true
+let BEST = LS.get("fdd-best",{});    // game -> points
+const stars = n => STARS[n]||0;
+function mark(n, ok){ SEEN[n]=true; STARS[n] = ok ? Math.min(3, stars(n)+1) : 0; LS.set("fdd-stars",STARS); LS.set("fdd-seen",SEEN); }
+
+const shuffle = a => {a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clean = t => t.replace(" (Handbook sample)","");
+
+// distractors: look-alikes first, then same family, then anything
+function itemOptions(n, pool){
+  if(pool){ return shuffle([n, ...shuffle(pool.filter(x=>x!==n)).slice(0,4)]); }
+  const sib = new Set(); (ITEM_CL[n]||[]).forEach(id=>CLUSTERS.find(c=>c.id===id).m.forEach(([x])=>{if(x!==n)sib.add(x)}));
+  let picks = shuffle([...sib]).slice(0,2);
+  shuffle(FAM_OF[n].m.filter(x=>x!==n && !picks.includes(x))).slice(0,1).forEach(x=>picks.push(x));
+  const rest = shuffle(ITEMS.map(i=>i.n).filter(x=>x!==n && !picks.includes(x)));
+  while(picks.length<4) picks.push(rest.pop());
+  return shuffle([n,...picks]);
+}
+function itemQ(n, text, pool){
+  return {kind:"item", n, ans:n, text: text ?? clean(pick(BY[n].s)), opts:itemOptions(n,pool).map(k=>({k,label:BY[k].name}))};
+}
+function snapQ(n, pool){ const q=itemQ(n, pick(BY[n].t), pool); q.snap=true; return q; }
+function triageQ(n){ return {kind:"fam", n, ans:FAM_OF[n].id, text:clean(pick(BY[n].s)), opts:FAM.map(f=>({k:f.id,label:f.name}))}; }
+
+// ---------- generic game engine ----------
+let G=null, tick=null, HOST=null;
+function stopGame(){ clearInterval(tick); if(G){ clearTimeout(G.autoT); G.done=true; } }
+function play(cfg, host){
+  clearInterval(tick); HOST=host;
+  G = Object.assign({i:0, score:0, pts:0, streak:0, bestStreak:0, answers:[], t0:Date.now(), locked:false}, cfg);
+  showQ(); tick=setInterval(onTick,200);
+}
+function remaining(){ return G.total ? Math.max(0,G.total-(Date.now()-G.t0)/1000) : Math.max(0,G.perQ-(Date.now()-G.qStart)/1000); }
+function onTick(){
+  if(!G || G.locked || G.done) return;
+  const r=remaining(), el=HOST.querySelector(".clock"), bar=HOST.querySelector(".bar i");
+  if(el){ const m=Math.floor(r/60), s=Math.floor(r%60); el.textContent = G.total? `${m}:${String(s).padStart(2,"0")}` : `${Math.ceil(r)} s`; el.classList.toggle("low", G.total? r<120 : r<=3); }
+  if(bar) bar.style.width = (100*r/(G.total||G.perQ))+"%";
+  if(r<=0){ if(G.total){ while(G.answers.length<G.qs.length) G.answers.push({q:G.qs[G.answers.length],pick:null,secs:0}); finish(); } else answer(null); }
+}
+function showQ(){
+  const q=G.qs[G.i];
+  const mult = 1+Math.min(3,Math.floor(G.streak/3));
+  HOST.innerHTML = `
+  <div class="case">
+    <div class="casehead"><span>${esc(G.title)} · ${G.i+1}/${G.qs.length}${G.feedback?` · ${G.score} right`:""}${G.points&&G.streak>=3?` · <span class="streak">streak ${G.streak} · x${mult}</span>`:""}</span><span class="clock">--</span></div>
+    <div class="bar"><i style="width:100%"></i></div>
+    ${q.snap?`<p class="q" style="padding-top:16px;margin-bottom:-14px">Which one gives itself away like this?</p>`:""}
+    <p class="scen${q.snap?" snap":""}">${esc(q.text)}</p>
+    <p class="q">${q.kind==="fam"?"Which family? (sort first, name second)":q.snap?"":"This is an example of:"}</p>
+    <div class="opts${q.opts.length>5?" two":""}">${q.opts.map((o,k)=>`<button class="opt" data-k="${o.k}"><span class="k">${k+1}</span><span>${esc(o.label)}</span></button>`).join("")}</div>
+    <div id="fb"></div>
+  </div>
+  <div class="row"><button class="btn ghost" id="quit">${G.total?"Submit now":"End round"}</button><span class="muted small">Keys <kbd>1</kbd> to <kbd>${q.opts.length}</kbd> answer, <kbd>Enter</kbd> next</span></div>`;
+  HOST.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(b.dataset.k));
+  HOST.querySelector("#quit").onclick=()=>{ if(G.total){ while(G.answers.length<G.qs.length) G.answers.push({q:G.qs[G.answers.length],pick:null,secs:0}); finish(); } else if(G.answers.length) finish(); else G.onExit(); };
+  G.locked=false; G.qStart=Date.now(); onTick();
+}
+function answer(k){
+  if(!G || G.locked || G.done) return;
+  const q=G.qs[G.i]; const key = k==null? null : (q.kind==="item"? +k : k);
+  const ok = key===q.ans, secs=(Date.now()-G.qStart)/1000;
+  G.answers.push({q,pick:key,secs});
+  let gained=0;
+  if(ok){ G.score++; G.streak++; G.bestStreak=Math.max(G.bestStreak,G.streak);
+    if(G.points){ const mult=1+Math.min(3,Math.floor((G.streak-1)/3)); gained=(100+Math.round(remaining()*10))*mult; G.pts+=gained; } }
+  else G.streak=0;
+  if(q.kind==="item") mark(q.n, ok);
+  if(!G.feedback){ G.i++; if(G.i>=G.qs.length) finish(); else showQ(); return; }
+  G.locked=true;
+  HOST.querySelectorAll(".opt").forEach(b=>{b.disabled=true; const kk = q.kind==="item"? +b.dataset.k : b.dataset.k; if(kk===q.ans)b.classList.add("right"); else if(kk===key)b.classList.add("wrong")});
+  const it=BY[q.n];
+  let body;
+  if(q.kind==="fam"){
+    const f=FAM_OF[q.n], chosen = key? FAM.find(x=>x.id===key):null;
+    body = `<p class="cue"><b>${esc(f.name)}</b>: ${esc(f.gist)} This one is <b>${esc(it.name)}</b>: ${esc(it.d)}</p>${chosen&&!ok?`<p class="cue muted"><b>${esc(chosen.name)}</b> would be: ${esc(chosen.gist)}</p>`:""}`;
+  } else {
+    const ch = key? BY[key]:null;
+    body = `<p class="cue"><b>${esc(it.name)}</b>: ${esc(it.d)}</p><p class="cue muted">Hook: ${esc(it.h)}</p>${ch&&!ok?`<p class="cue muted"><b>${esc(ch.name)}</b> would need: ${esc(ch.d)}</p>`:""}`;
+  }
+  const auto = G.points && ok;
+  HOST.querySelector("#fb").innerHTML = `<div class="fb">
+    <span class="verdict ${ok?"ok":"bad"}">${ok?"Correct":key===null?"Time's up":"Not this one"} · ${secs.toFixed(1)} s ${gained?`<span class="pop">+${gained}</span>`:""}</span>
+    ${body}
+    <div><button class="btn" id="next">${G.i+1<G.qs.length?"Next":"See result"}</button></div></div>`;
+  HOST.querySelector("#next").onclick=next; HOST.querySelector("#next").focus();
+  if(auto){ G.autoT=setTimeout(()=>{ if(G && G.locked && !G.done) next(); }, 900); }
+}
+function next(){ clearTimeout(G.autoT); G.i++; if(G.i>=G.qs.length) finish(); else showQ(); }
+function finish(){
+  clearInterval(tick); clearTimeout(G.autoT);
+  const n=G.qs.length, score=G.answers.filter(a=>a.pick===a.q.ans).length;
+  const answered=G.answers.filter(a=>a.pick!==null), avg = answered.length? answered.reduce((t,a)=>t+a.secs,0)/answered.length : 0;
+  const misses=G.answers.filter(a=>a.pick!==a.q.ans);
+  let best=null, newBest=false;
+  if(G.points){ best=BEST[G.id]||0; if(G.pts>best){ BEST[G.id]=G.pts; LS.set("fdd-best",BEST); newBest=true; } }
+  const g = G.mock? grade(score) : null;
+  HOST.innerHTML = `
+  <div class="panel stack">
+    <div class="result">
+      <div><div class="big">${score}<span class="muted" style="font-size:1.4rem">/${n}</span></div><span class="muted small">${esc(G.title)}</span></div>
+      ${g?`<div><div class="grade">${g}</div><span class="muted small">handbook band</span></div>`:""}
+      ${G.points?`<div><div class="grade">${G.pts.toLocaleString()}</div><span class="muted small">${newBest?"new best":"best "+best.toLocaleString()}</span></div><div><div class="grade" style="color:var(--bia)">${G.bestStreak}</div><span class="muted small">longest streak</span></div>`:""}
+      <div><div class="grade" style="color:var(--ink)">${avg.toFixed(1)} s</div><span class="muted small">avg per answer</span></div>
+    </div>
+    ${G.mock?`<div class="gradegrid">${[26,25,24,23,22,21,20,19,18].map(p=>`<div class="${p===score?"hl":""}">${p} · ${GRADES[p]}</div>`).join("")}</div>`:""}
+    <div class="row"><button class="btn" id="again">Play again</button><button class="btn ghost" id="home">Back</button></div>
+  </div>
+  ${misses.length?`<h2>Review: ${misses.length} missed</h2><div class="misslist">${misses.map(a=>{const it=BY[a.q.n];
+    const yours = a.pick==null? "No answer. On the day, always pick something: there is no negative marking."
+      : a.q.kind==="fam"? `You chose <b>${esc(FAM.find(f=>f.id===a.pick).name)}</b>.` : `You chose <b>${esc(BY[a.pick].name)}</b>: ${esc(BY[a.pick].d)}`;
+    return `<div class="miss"><p>${esc(a.q.text)}</p><p class="cue"><b>${esc(it.name)}</b> (${esc(FAM_OF[a.q.n].name)}): ${esc(it.d)}</p><p class="cue muted">${yours}</p></div>`}).join("")}</div>`:`<p class="muted">Clean round.</p>`}`;
+  const again=G.again, exit=G.onExit; G.done=true;
+  HOST.querySelector("#again").onclick=again; HOST.querySelector("#home").onclick=exit;
+  refreshBoards();
+}
+document.addEventListener("keydown",e=>{
+  if(!G || G.done || !HOST || HOST.closest("section").hidden) return;
+  if(["INPUT","SELECT"].includes(e.target.tagName)) return;
+  const k=parseInt(e.key,10);
+  if(!G.locked && k>=1){ const b=HOST.querySelectorAll(".opt")[k-1]; if(b){b.click(); e.preventDefault();} }
+  else if(e.key==="Enter" && G.locked){ const nb=HOST.querySelector("#next"); if(nb){nb.click(); e.preventDefault();} }
+});
+
+// ---------- START ----------
+function drawStart(){
+  document.getElementById("tab-start").innerHTML = `
+  <div class="panel stack">
+    <h2>Three kinds of mistake</h2>
+    <p class="muted">All 60 items are one of these. Sorting a question into its kind is the first move, and it halves the options.</p>
+    <div class="grid">
+      <div class="kind f"><span class="lab">Fallacy · 32 items</span><h3>A bug in the argument</h3>
+        <p>A flaw in what someone <b>says or writes</b> to persuade you. The reasons don't support the conclusion.</p>
+        <dl><dt>Lives in</dt><dd>The text on the page</dd><dt>Look for</dt><dd>'so', 'therefore', 'should', 'must'</dd><dt>Test</dt><dd>Would the conclusion survive if you fixed the wording?</dd></dl></div>
+      <div class="kind b"><span class="lab">Bias · 25 items</span><h3>A tilt in the mind</h3>
+        <p>A predictable error in how people <b>judge, remember or decide</b>. Nobody has to be arguing.</p>
+        <dl><dt>Lives in</dt><dd>The person's head</dd><dt>Look for</dt><dd>believes, rates, estimates, remembers, chooses</dd><dt>Test</dt><dd>Would most people make the same slip?</dd></dl></div>
+      <div class="kind b"><span class="lab">Heuristic · 3 items</span><h3>A shortcut that misfires</h3>
+        <p>A <b>rule of thumb</b> the brain uses to answer fast. Usually useful; it causes errors when the situation doesn't fit.</p>
+        <dl><dt>On the list</dt><dd>Availability, representativeness, anchoring</dd><dt>Look for</dt><dd>a quick estimate of odds or value</dd></dl></div>
+    </div>
+    <p class="small muted">The split is rough at the edges: the spreadsheet calls a few biases 'fallacies' (sunk cost, gambler's, base rate). You never need to label the kind on the test; you use it to sort.</p>
+  </div>
+
+  <div class="panel stack">
+    <h2>The 40-second triage</h2>
+    <div class="flow">
+      <div class="step"><span class="num">1</span><div><b>Is someone arguing a point?</b> Look for a conclusion: 'so', 'should', 'must', 'therefore'. If yes, it's a fallacy. Ask what breaks:
+        <div class="branch"><span class="chip f">the wording itself → Word tricks</span><span class="chip f">attacks, twists or corners the other side → Dirty fighting</span><span class="chip f">the chain of steps → Broken logic</span><span class="chip f">a cause, a comparison, or parts and groups → Fake cause</span></div></div></div>
+      <div class="step"><span class="num">2</span><div><b>No argument, someone is judging or deciding?</b> It's a bias or heuristic. Who or what is being judged?
+        <div class="branch"><span class="chip b">odds, numbers, prices → Odds and numbers</span><span class="chip b">other people, or a group deciding → People and groups</span><span class="chip b">themselves → Me, myself</span><span class="chip b">clinging to a belief, a spend or the past → Stuck</span></div></div></div>
+      <div class="step"><span class="num">3</span><div><b>Hunt the giveaway words.</b> Inside the family, one phrase usually names it: 'as we all know', 'since then', 'due', 'already spent', 'knew it all along'. The Cheat sheet lists them for all 60.</div></div>
+      <div class="step"><span class="num">4</span><div><b>Two options still fit?</b> Use the deciding question in Look-alikes. Then commit and move. No negative marking.</div></div>
+    </div>
+  </div>
+
+  <div class="panel stack">
+    <div class="row" style="justify-content:space-between"><h2>Your collection</h2><span class="meta" id="tally"></span></div>
+    <p class="muted small">Each correct answer in any game adds a level to that item, up to 3. A miss drops it back to 0, so weak ones keep coming back. Tap a tile to see its card.</p>
+    <div class="board" id="board"></div>
+    <div class="legend"><span><i style="background:var(--star0)"></i>new</span><span><i style="background:var(--star1)"></i>1</span><span><i style="background:var(--star2)"></i>2</span><span><i style="background:var(--star3)"></i>mastered</span></div>
+  </div>
+
+  <div class="panel stack">
+    <h2>Why it's built this way</h2>
+    <dl class="why">
+      <dt>Answer, don't reread</dt><dd>Practice testing is one of two techniques rated high utility in the main review of study methods (Dunlosky et al., 2013). Every Learn batch ends in a quiz, and every game makes you answer.</dd>
+      <dt>Mix the look-alikes</dt><dd>Interleaving, mixing examples from similar categories, beats studying one category at a time when you must tell categories apart (Kornell and Bjork, 2008). A 2026 replication held up under forced-choice testing, the same format as this test. Snap, Sprint and the look-alike drills deliberately mix confusable items.</dd>
+      <dt>Spread it out</dt><dd>Distributed practice is the other high-utility technique. Spread your rounds over several days, starting each morning cold.</dd>
+      <dt>Contrast on every miss</dt><dd>When you're wrong you see both definitions side by side, which trains the boundary, not just the name.</dd>
+      <dt>Hooks and phrases</dt><dd>Memory hooks are handles for the first few days; the review rates mnemonics low for long-term learning, which doesn't matter for a test days away.</dd>
+      <dt>Points and streaks</dt><dd>A meta-analysis found gamification gives a moderate gain on learning outcomes (g = 0.49, Sailer and Homner, 2020). Their job here is to get you to do more practice rounds; the rounds do the learning.</dd>
+    </dl>
+  </div>`;
+  refreshBoards();
+}
+function refreshBoards(){
+  const b=document.getElementById("board");
+  if(b){ b.innerHTML = ITEMS.map(i=>`<button class="tile" data-s="${stars(i.n)}" data-n="${i.n}" title="${esc(i.name)}" aria-label="${esc(i.name)}, level ${stars(i.n)}">${i.n}</button>`).join("");
+    b.querySelectorAll(".tile").forEach(t=>t.onclick=()=>{showTab("learn"); learnCard(FAM_OF[+t.dataset.n].id, FAM_OF[+t.dataset.n].m.indexOf(+t.dataset.n), true)});
+    const m3=ITEMS.filter(i=>stars(i.n)===3).length, seen=Object.keys(SEEN).length;
+    document.getElementById("tally").textContent = `${m3}/60 mastered · ${seen}/60 seen`; }
+}
+
+// ---------- LEARN ----------
+const LH = document.getElementById("tab-learn");
+let LEARN=null;
+function drawLearnHome(){
+  if(G && !G.done && HOST===LH) stopGame();
+  LEARN=null;
+  LH.innerHTML = `<p class="muted">Eight families, 7 to 9 items each. Read the cards (about 30 seconds each), then take the check: one scenario per item, all options from the same family.</p>
+  <div class="grid">${FAM.map(f=>{const avg=f.m.reduce((t,n)=>t+stars(n),0)/(3*f.m.length);
+    return `<button class="fam" data-f="${f.id}"><div class="top"><span class="typ ${f.k}">${f.k==="f"?"Fallacies":"Biases / heuristics"}</span><span class="meta">${f.m.length} items</span></div>
+    <h3>${esc(f.name)}</h3><span class="muted small">${esc(f.gist)}</span><div class="meter"><i style="width:${Math.round(avg*100)}%"></i></div></button>`}).join("")}</div>`;
+  LH.querySelectorAll(".fam").forEach(b=>b.onclick=()=>learnCard(b.dataset.f,0));
+}
+function learnCard(fid, idx, single){
+  if(G && !G.done && HOST===LH) stopGame();
+  const f=FAM.find(x=>x.id===fid); const n=f.m[idx]; const it=BY[n];
+  LEARN={fid, idx};
+  LH.innerHTML = `
+  <div class="row" style="justify-content:space-between"><span class="meta">${esc(f.name)} · card ${idx+1} of ${f.m.length}</span><button class="btn ghost" id="lback">All families</button></div>
+  <div class="card">
+    <div><span class="chip ${f.k}">${f.k==="f"?"Fallacy":"Bias / heuristic"}</span></div>
+    <div class="nm">${esc(it.name)}${it.alt?`<span class="muted" style="font-size:1rem;font-weight:500"> · ${esc(it.alt)}</span>`:""}</div>
+    <p class="def">${esc(it.d)}</p>
+    <div><div class="lbl">Giveaway words</div><div class="row" style="gap:6px">${it.t.map(t=>`<span class="chip tell">${esc(t)}</span>`).join("")}</div></div>
+    <p class="hook">${esc(it.h)}</p>
+    <div><div class="lbl">Example</div><p>${esc(clean(it.s[0]))}</p></div>
+    <div><div class="lbl">You'll meet it in</div><p>${esc(it.w)}</p></div>
+    ${it.flag?`<p class="small muted">Note: ${esc(it.flag)}. See Source notes.</p>`:""}
+  </div>
+  <div class="row">
+    <button class="btn ghost" id="prev" ${idx===0?"disabled":""}>Previous</button>
+    ${idx+1<f.m.length?`<button class="btn" id="nxt">Next card</button>`:`<button class="btn" id="check">Take the check (${f.m.length} Q)</button>`}
+    ${single?"":`<button class="btn ghost" id="skip">Skip to the check</button>`}
+  </div>`;
+  LH.querySelector("#lback").onclick=drawLearnHome;
+  const pv=LH.querySelector("#prev"); if(pv) pv.onclick=()=>learnCard(fid,idx-1);
+  const nx=LH.querySelector("#nxt"); if(nx) nx.onclick=()=>learnCard(fid,idx+1);
+  const ck=LH.querySelector("#check"); if(ck) ck.onclick=()=>familyCheck(fid);
+  const sk=LH.querySelector("#skip"); if(sk) sk.onclick=()=>familyCheck(fid);
+}
+function familyCheck(fid){
+  const f=FAM.find(x=>x.id===fid); LEARN=null;
+  const qs = shuffle(f.m).map(n=>itemQ(n, null, f.m));
+  play({id:"check-"+fid, title:f.name+" check", qs, perQ:40, feedback:true, again:()=>familyCheck(fid), onExit:drawLearnHome}, LH);
+}
+
+// ---------- PLAY ----------
+const PH=document.getElementById("tab-play");
+const SAMPLE_OPTS=[4,21,31,35,37];
+function drawPlay(){
+  if(G && !G.done && HOST===PH) stopGame();
+  const weak = ITEMS.filter(i=>SEEN[i.n] && stars(i.n)<2).length;
+  const famSel = `<option value="all">All 60</option><option value="f">Fallacies only</option><option value="b">Biases only</option>${FAM.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join("")}`;
+  PH.innerHTML = `
+  <div class="grid">
+    <div class="panel stack"><span class="meta" style="color:var(--bia)">20 rounds · 10 s each · streak multiplier</span><h3>Signal Snap</h3>
+      <p class="muted small">Just the giveaway words, no full scenario. Name it fast. Every three in a row raises your multiplier; speed earns bonus points.</p>
+      <select id="snapset" aria-label="Snap set">${famSel}</select>
+      <div class="row"><button class="btn" id="snap">Play</button><span class="meta">best ${(BEST.snap||0).toLocaleString()}</span></div></div>
+    <div class="panel stack"><span class="meta" style="color:var(--bia)">15 rounds · 8 s each</span><h3>Family Triage</h3>
+      <p class="muted small">Read a scenario and only sort it into one of the eight families. Trains the first move that halves every question.</p>
+      <div class="row"><button class="btn" id="tri">Play</button><span class="meta">best ${(BEST.tri||0).toLocaleString()}</span></div></div>
+    <div class="panel stack"><span class="meta">10 Q · 40 s each</span><h3>Sprint</h3>
+      <p class="muted small">Full scenarios, test format, five options with look-alikes mixed in. Feedback after each.</p>
+      <div class="row"><button class="btn" id="sprint">Play</button></div></div>
+    <div class="panel stack"><span class="meta">${weak} item${weak===1?"":"s"} below level 2</span><h3>Weak spots</h3>
+      <p class="muted small">Only items you've missed or not yet nailed.</p>
+      <div class="row"><button class="btn" id="weak" ${weak?"":"disabled"}>Play</button></div></div>
+    <div class="panel stack"><span class="meta">pick a group</span><h3>Look-alike drill</h3>
+      <p class="muted small">All five options come from one confusable group.</p>
+      <select id="clsel" aria-label="Group">${CLUSTERS.filter(c=>c.m.length>=3).map(c=>`<option value="${c.id}">${esc(c.title)}</option>`).join("")}</select>
+      <div class="row"><button class="btn" id="clgo">Play</button></div></div>
+    <div class="panel stack"><span class="meta">26 Q · 20:00 · no feedback</span><h3>Full mock</h3>
+      <p class="muted small">Test conditions: no going back, auto-submits at 20:00, graded on the handbook bands.</p>
+      <div class="row"><button class="btn" id="mock">Start mock</button></div></div>
+  </div>
+  <div class="case">
+    <div class="casehead"><span>Handbook sample question</span><span>Cottrell p.63</span></div>
+    <p class="scen">${esc(clean(BY[4].s[0]))}</p><p class="q">This is an example of:</p>
+    <div class="opts" id="sampleopts">${SAMPLE_OPTS.map((o,i)=>`<button class="opt" data-o="${o}"><span class="k">${"abcde"[i]}</span><span>${esc(BY[o].name)}</span></button>`).join("")}</div>
+    <div id="samplefb"></div>
+  </div>`;
+  const back=()=>drawPlay();
+  PH.querySelector("#snap").onclick=()=>{const set=PH.querySelector("#snapset").value; startSnap(set)};
+  PH.querySelector("#tri").onclick=startTriage;
+  PH.querySelector("#sprint").onclick=startSprint;
+  PH.querySelector("#weak").onclick=startWeak;
+  PH.querySelector("#clgo").onclick=()=>startCluster(PH.querySelector("#clsel").value);
+  PH.querySelector("#mock").onclick=startMock;
+  PH.querySelectorAll("#sampleopts .opt").forEach(b=>b.onclick=()=>{
+    const ok=+b.dataset.o===4;
+    PH.querySelectorAll("#sampleopts .opt").forEach(x=>{x.disabled=true; if(+x.dataset.o===4)x.classList.add("right"); else if(x===b)x.classList.add("wrong")});
+    PH.querySelector("#samplefb").innerHTML=`<div class="fb"><span class="verdict ${ok?"ok":"bad"}">${ok?"Correct: (a)":"The answer is (a)"}</span><p class="cue">Cottrell uses this exact passage for logical consistency: the reason (young people hang around the station) doesn't support the conclusion (ban all young people). Stereotyping isn't offered, so you win by triage: it's an argument with a 'should', so it's a fallacy, and the other four are a repetition fallacy and three biases.</p></div>`;
+  });
+}
+function pool(set){
+  if(set==="all") return ITEMS.map(i=>i.n);
+  if(set==="f"||set==="b") return FAM.filter(f=>f.k===set).flatMap(f=>f.m);
+  return FAM.find(f=>f.id===set).m;
+}
+function startSnap(set){
+  const p=pool(set); const restrict = (set!=="all" && set!=="f" && set!=="b")? p : null;
+  const order=[]; while(order.length<20) order.push(...shuffle(p));
+  play({id:"snap", title:"Signal Snap", qs:order.slice(0,20).map(n=>snapQ(n,restrict)), perQ:10, feedback:true, points:true, again:()=>startSnap(set), onExit:drawPlay}, PH);
+}
+function startTriage(){ play({id:"tri", title:"Family Triage", qs:shuffle(ITEMS.map(i=>i.n)).slice(0,15).map(triageQ), perQ:8, feedback:true, points:true, again:startTriage, onExit:drawPlay}, PH); }
+function startSprint(){ play({id:"sprint", title:"Sprint", qs:shuffle(ITEMS.map(i=>i.n)).slice(0,10).map(n=>itemQ(n)), perQ:40, feedback:true, again:startSprint, onExit:drawPlay}, PH); }
+function startWeak(){
+  const w=ITEMS.filter(i=>SEEN[i.n] && stars(i.n)<2).map(i=>i.n); if(!w.length){drawPlay();return}
+  const order=[]; while(order.length<Math.min(15,w.length*2)) order.push(...shuffle(w));
+  play({id:"weak", title:"Weak spots", qs:order.slice(0,Math.min(15,w.length*2)).map(n=>itemQ(n)), perQ:40, feedback:true, again:startWeak, onExit:drawPlay}, PH);
+}
+function startCluster(cid){
+  const c=CLUSTERS.find(x=>x.id===cid), p=c.m.map(x=>x[0]); const list=[]; p.forEach(n=>BY[n].s.forEach(t=>list.push([n,t])));
+  play({id:"cl", title:c.title, qs:shuffle(list).slice(0,12).map(([n,t])=>itemQ(n,clean(t),p)), perQ:40, feedback:true, again:()=>startCluster(cid), onExit:drawPlay}, PH);
+}
+function startMock(){ play({id:"mock", title:"Full mock", mock:true, qs:shuffle(ITEMS.map(i=>i.n)).slice(0,26).map(n=>itemQ(n)), total:1200, feedback:false, again:startMock, onExit:drawPlay}, PH); }
+
+// ---------- CHEAT SHEET ----------
+function drawSheet(){
+  const el=document.getElementById("tab-sheet");
+  el.innerHTML = `<div class="row" style="justify-content:space-between">
+    <select id="sf" aria-label="Family"><option value="">All families</option>${FAM.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join("")}</select>
+    <input type="search" id="q" placeholder="Search a word or phrase" aria-label="Search"></div>
+    <div class="tblwrap"><table><thead><tr><th>#</th><th>Name</th><th>Plain meaning and giveaway words</th><th>Hook</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    <p class="muted small">Numbers follow the module list. Items 1 to 22: Cottrell (2023). Items 23 to 60: module spreadsheet.</p>`;
+  const draw=()=>{ const f=el.querySelector("#q").value.toLowerCase(), fam=el.querySelector("#sf").value;
+    el.querySelector("#tbody").innerHTML = FAM.filter(x=>!fam||x.id===fam).flatMap(x=>x.m).map(n=>BY[n]).filter(i=>!f||(i.name+" "+(i.alt||"")+" "+i.d+" "+i.t.join(" ")+" "+i.h).toLowerCase().includes(f)).map(i=>`<tr>
+      <td class="n">${i.n}</td>
+      <td class="name">${esc(i.name)}${i.alt?`<div class="muted small" style="font-weight:400">${esc(i.alt)}</div>`:""}<div style="margin-top:6px"><span class="chip ${FAM_OF[i.n].k}" style="font-weight:400;font-size:.75rem">${esc(FAM_OF[i.n].name)}</span></div>${i.flag?`<span class="flag">${esc(i.flag)}</span>`:""}</td>
+      <td>${esc(i.d)}<div class="tells">${i.t.map(t=>`<span class="chip tell">${esc(t)}</span>`).join("")}</div></td>
+      <td class="muted">${esc(i.h)}</td></tr>`).join(""); };
+  el.querySelector("#q").addEventListener("input",draw); el.querySelector("#sf").addEventListener("change",draw); draw();
+}
+
+// ---------- LOOK-ALIKES ----------
+function drawPairs(){
+  const el=document.getElementById("tab-pairs");
+  el.innerHTML = `<p class="muted small">Each group is a set the test can put side by side as options. Learn the one question that splits them, then drill the group.</p>
+  <div class="clusters">${CLUSTERS.map(c=>`<div class="cl"><h3>${esc(c.title)}</h3><p class="ask">Ask: ${esc(c.ask)}</p>
+    <dl>${c.m.map(([n,t])=>`<dt>${esc(BY[n].name)}</dt><dd>${esc(t)}</dd>`).join("")}</dl>
+    ${c.m.length>=3?`<button class="btn ghost go" data-c="${c.id}" style="align-self:flex-start">Drill this group</button>`:""}</div>`).join("")}</div>`;
+  el.querySelectorAll(".go").forEach(b=>b.onclick=()=>{showTab("play"); startCluster(b.dataset.c)});
+}
+
+// ---------- NOTES ----------
+function drawNotes(){
+  document.getElementById("tab-notes").innerHTML = `
+  <div class="panel stack"><h2>What the test draws on</h2>
+    <p>Items 1 to 22 are defined in Cottrell (2023), chapters 5 to 8. Items 23 to 60 are defined only in the module spreadsheet, which links to Wikipedia and changingminds.org. The handbook sample question is Cottrell's own passage from p.63, so expect other questions to reuse Cottrell's examples. Every scenario, hook and giveaway phrase here was written for practice; none are past test questions.</p></div>
+  <h2>Where the sources disagree</h2>
+  <div class="note"><b>Spotlight effect (56).</b> The spreadsheet note describes the spotlight fallacy: well-publicised cases assumed to represent a whole group. The usual psychology meaning is overestimating how much others notice you. Both are drilled. For a 'headline cases' scenario with both Spotlight effect and Availability heuristic offered, the spreadsheet points to Spotlight effect.</div>
+  <div class="note"><b>Presentism (58).</b> The spreadsheet note is garbled. Use the standard meaning: judging the past by present-day values or knowledge.</div>
+  <div class="note"><b>Lack of consistency (4) vs non sequitur (6).</b> Cottrell's 'logical consistency' covers conclusions that don't follow from their reasons, which overlaps with non sequitur. The handbook sample keys the station murder passage to Lack of consistency. If both are offered: a contradiction, or a Cottrell passage, points to 4; one specific hidden assumption points to 6.</div>
+  <div class="note"><b>Exclusion (15) vs in-group bias (46).</b> Exclusion is a move inside an argument (casting opponents as outsiders). In-group bias is a judgement or reward that favours your own group.</div>
+  <div class="note"><b>Trivialisation (20).</b> Cottrell means making a serious matter look minor; the spreadsheet links it to the single-cause fallacy. Both senses map to 20.</div>
+  <div class="note"><b>Restricted options.</b> Cottrell files 'only two options' under misrepresentation (p.105). The list has False dichotomy (28) as its own item, so pick that if offered.</div>
+  <div class="panel stack"><h2>On the day</h2><ul class="tight">
+    <li>No negative marking, no going back. Never leave a blank: triage, eliminate, commit at about 40 s.</li></ul></div>`;
+}
+
+// ---------- tabs ----------
+function showTab(t){
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===t));
+  ["start","learn","play","sheet","pairs","notes"].forEach(x=>document.getElementById("tab-"+x).hidden = x!==t);
+  if(t==="start") refreshBoards();
+  if(t==="learn" && !LEARN && (!G || G.done || HOST!==LH)) drawLearnHome();
+  if(t==="play" && (!G || G.done || HOST!==PH)) drawPlay();
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+drawStart(); drawLearnHome(); drawPlay(); drawSheet(); drawPairs(); drawNotes();
+</script>
